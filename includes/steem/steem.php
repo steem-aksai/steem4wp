@@ -1,6 +1,6 @@
 <?php
 
-include (__DIR__).'/../../vendor/autoload.php';
+namespace Steem4WP;
 
 use SteemPHP\SteemAccount;
 use SteemPHP\SteemPost;
@@ -82,7 +82,7 @@ class Steem
 	 *
 	 * @return     array   Number of follows.
 	 */
-	public function getFollowCounts($author)
+	public function getFollowsCount($author)
 	{
 		return $this->steemAccount->countFollows($author);
 	}
@@ -177,7 +177,7 @@ class Steem
 	 *
 	 * @return     array    The posts by the account.
 	 */
-	public function getPostsOfAccount($author, $limit = 100, $startPermlink = null)
+	public function getPostsByAuthor($author, $limit = 100, $startPermlink = null)
 	{
 		return $this->steemPost->getDiscussionsByBlog($author, $limit, $startPermlink);
 	}
@@ -196,6 +196,55 @@ class Steem
 	public function getPostsByFeed($author, $limit = 100, $startAuthor = null, $startPermlink = null)
 	{
 		return $this->steemPost->getDiscussionsByFeed($author, $limit, $startAuthor, $startPermlink);
+	}
+
+
+	/**
+	 * Gets the list of articles created under the $tag
+	 * Start author and start permlink are for pagination.
+	 *
+	 * @param      string   $tag            The tag
+	 * @param      integer  $limit          The limit
+	 * @param      string   $startAuthor    The start author
+	 * @param      string   $startPermlink  The start permlink
+	 *
+	 * @return     array    The list of articles.
+	 */
+	public function getPostsByCreated($tag, $limit = 100, $startAuthor = null, $startPermlink = null)
+	{
+		return $this->steemPost->getDiscussionsByCreated($tag, $limit, $startAuthor, $startPermlink);
+	}
+
+	/**
+	 * Gets the list of trending articles (content/votes/replies) posted under the $tag.
+	 * Start author and start permlink are for pagination.
+	 *
+	 * @param      string   $tag            The tag
+	 * @param      integer  $limit          The limit
+	 * @param      string   $startAuthor    The start author
+	 * @param      string   $startPermlink  The start permlink
+	 *
+	 * @return     array    The list of trending articles.
+	 */
+	public function getPostsByTrending($tag, $limit = 100, $startAuthor = null, $startPermlink = null)
+	{
+		return $this->steemPost->getDiscussionsByTrending($tag, $limit, $startAuthor, $startPermlink);
+	}
+
+	/**
+	 * Get list of articles which are hot and using tha tag $tag
+	 * Start author and start permlink are for pagination
+	 *
+	 * @param      string   $tag            The tag
+	 * @param      integer  $limit          The limit
+	 * @param      string   $startAuthor    The start author
+	 * @param      string   $startPermlink  The start permlink
+	 *
+	 * @return     array    The discussions by hot.
+	 */
+	public function getPostsByHot($tag, $limit = 100, $startAuthor = null, $startPermlink = null)
+	{
+		return $this->steemPost->getDiscussionsByHot($tag, $limit, $startAuthor, $startPermlink);
 	}
 
 	/**
@@ -262,7 +311,6 @@ class Steem
 		}
 	}
 
-
 	/**
 	 * Downvote a post
 	 *
@@ -308,54 +356,6 @@ class Steem
 	public function forwardPost($account, $author, $permlink)
 	{
 		return $this->steemPost->reblog($this->getWif($account), $account, $author, $permlink);
-	}
-
-	/**
-	 * Gets the list of articles created under the $tag
-	 * Start author and start permlink are for pagination.
-	 *
-	 * @param      string   $tag            The tag
-	 * @param      integer  $limit          The limit
-	 * @param      string   $startAuthor    The start author
-	 * @param      string   $startPermlink  The start permlink
-	 *
-	 * @return     array    The list of articles.
-	 */
-	public function getPostsByCreated($tag, $limit = 100, $startAuthor = null, $startPermlink = null)
-	{
-		return $this->steemPost->getDiscussionsByCreated($tag, $limit, $startAuthor, $startPermlink);
-	}
-
-	/**
-	 * Gets the list of trending articles (content/votes/replies) posted under the $tag.
-	 * Start author and start permlink are for pagination.
-	 *
-	 * @param      string   $tag            The tag
-	 * @param      integer  $limit          The limit
-	 * @param      string   $startAuthor    The start author
-	 * @param      string   $startPermlink  The start permlink
-	 *
-	 * @return     array    The list of trending articles.
-	 */
-	public function getPostsByTrending($tag, $limit = 100, $startAuthor = null, $startPermlink = null)
-	{
-		return $this->steemPost->getDiscussionsByTrending($tag, $limit, $startAuthor, $startPermlink);
-	}
-
-	/**
-	 * Get list of articles which are hot and using tha tag $tag
-	 * Start author and start permlink are for pagination
-	 *
-	 * @param      string   $tag            The tag
-	 * @param      integer  $limit          The limit
-	 * @param      string   $startAuthor    The start author
-	 * @param      string   $startPermlink  The start permlink
-	 *
-	 * @return     array    The discussions by hot.
-	 */
-	public function getPostsByHot($tag, $limit = 100, $startAuthor = null, $startPermlink = null)
-	{
-		return $this->steemPost->getDiscussionsByHot($tag, $limit, $startAuthor, $startPermlink);
 	}
 
 	/**
