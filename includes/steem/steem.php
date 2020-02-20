@@ -1,6 +1,8 @@
 <?php
 
-namespace Steem4WP;
+// namespace Steem4WP;
+
+include (__DIR__).'/../../vendor/autoload.php';
 
 use SteemPHP\SteemAccount;
 use SteemPHP\SteemPost;
@@ -62,7 +64,12 @@ class Steem
 	 */
 	public function getAccount($author)
 	{
-		return $this->steemAccount->getAccount($author);
+		$accounts = $this->steemAccount->getAccount($author);
+		if (!empty($accounts) && count($accounts) > 0) {
+			return $accounts[0];
+		} else {
+			return null;
+		}
 	}
 
 	/**

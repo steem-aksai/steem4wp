@@ -10,12 +10,12 @@ class SteemTest extends TestCase
 
 	protected function setUp(): void
 	{
-		$this->steem = new \Steem4WP\Steem('https://anyx.io');
+		$this->steem = new Steem('https://anyx.io');
 	}
 
 	public function testGetAccount()
 	{
-		$this->assertArrayHasKey('name', $this->steem->getAccount('robertyan')[0]);
+		$this->assertArrayHasKey('name', $this->steem->getAccount('robertyan'));
   }
 
 	public function testGetAccounts()
@@ -80,30 +80,30 @@ class SteemTest extends TestCase
 		$this->assertArrayHasKey('permlink', $this->steem->getPostsByHot('travel', 3)[0]);
 	}
 
-	// public function testComment()
-	// {
-	// 	$this->assertIsInt($this->SteemPost->comment("...", "koei", "steempeak-cn", "koei", null, "", "Test with SteemPHP", "{}"));
-	// }
+	public function testComment()
+	{
+		$this->assertIsInt($this->SteemPost->comment("...", "koei", "steempeak-cn", "koei", null, "", "Test with SteemPHP", "{}"));
+	}
 
-	// public function testDeleteComment()
-	// {
-	// 	$this->assertIsInt($this->SteemPost->deleteComment("...", "koei",  "re-koei-steempeak-cn-20200204t091738252z"));
-	// }
+	public function testDeleteComment()
+	{
+		$this->assertIsInt($this->SteemPost->deleteComment("...", "koei",  "re-koei-steempeak-cn-20200204t091738252z"));
+	}
 
-	// public function testVote()
-	// {
-	// 	$this->assertIsInt($this->SteemPost->vote("...", "koei", "koei", "re-koei-steempeak-cn-20200203t130104730z", 20));
-	// }
+	public function testVote()
+	{
+		$this->assertIsInt($this->SteemPost->vote("...", "koei", "koei", "re-koei-steempeak-cn-20200203t130104730z", 20));
+	}
 
-	// public function testUnVote()
-	// {
-	// 	$this->assertIsInt($this->SteemPost->unvote("...", "koei", "koei", "re-koei-steempeak-cn-20200203t130104730z"));
-	// }
+	public function testUnVote()
+	{
+		$this->assertIsInt($this->SteemPost->unvote("...", "koei", "koei", "re-koei-steempeak-cn-20200203t130104730z"));
+	}
 
-	// public function testReblog()
-	// {
-	// 	$this->assertIsInt($this->SteemPost->reblog("...", "koei", "robertyan", "awesome-steem-for-steem-developers"));
-	// }
+	public function testReblog()
+	{
+		$this->assertIsInt($this->SteemPost->reblog("...", "koei", "robertyan", "awesome-steem-for-steem-developers"));
+	}
 
 }
 
