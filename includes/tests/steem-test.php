@@ -2,6 +2,7 @@
 
 include (__DIR__).'/../../vendor/autoload.php';
 include (__DIR__).'/../steem/steem.php';
+// include (__DIR__).'/../../steem-for-wordpress.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -80,14 +81,14 @@ class SteemTest extends TestCase
 		$this->assertArrayHasKey('permlink', $this->steem->getPostsByHot('travel', 3)[0]);
 	}
 
-	public function testComment()
+	public function testCreatePost()
 	{
-		$this->assertIsInt($this->SteemPost->comment("...", "koei", "steempeak-cn", "koei", null, "", "Test with SteemPHP", "{}"));
+		$this->assertIsInt($this->steem->createPost("koei", "Steem4WP 发帖测试", "文章内容", ["test"]));
 	}
 
-	public function testDeleteComment()
+	public function testDeletePost()
 	{
-		$this->assertIsInt($this->SteemPost->deleteComment("...", "koei",  "re-koei-steempeak-cn-20200204t091738252z"));
+		$this->assertIsInt($this->steem->deletePost("koei",  "steem4wp-"));
 	}
 
 	public function testVote()

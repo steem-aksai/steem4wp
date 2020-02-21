@@ -53,7 +53,7 @@ class Steem
 	 */
 	protected function getWif($account)
 	{
-		return "...";
+		return get_option("steem_dapp_wif");
 	}
 
 
@@ -258,16 +258,41 @@ class Steem
 	 * Create a post
 	 *
 	 * @param      string  $author   				The author of the comment
-	 * @param      string  $permlink   			The permlink of the comment
 	 * @param      string  $title   				The title of the comment
 	 * @param      string  $body   					The body of the comment
-	 * @param      string  $jsonMetadata   	The json data of the comment
+	 * @param      string  $tags   					The tags for the comment
+	 * @param      string  $app             The app name for the comment
+	 * @param      string  $jsonMetadata   	The json metadata of the comment
+	 * @param      string  $permlink   			The permlink of the comment
 	 *
 	 * @return     array   The response of the action
 	 */
-	public function createPost($author, $permlink, $title, $body, $jsonMetadata)
+	public function createPost($author, $title, $body, $tags = null, $app = null, $jsonMetadata = null, $permlink = null)
 	{
-		return $this->steemPost->comment($this->getWif($author), null, null, $author, $permlink, $title, $body, $jsonMetadata);
+		if (empty($tags) && function_exists('get_option')) {
+			$tagsText = get_option("steem_dapp_default_tags");
+			if (!empty($tagsText)) {
+				$tagsText = strtolower($tagsText);
+				$tags = wp_parse_list($tagsText);
+			}
+		}
+		if (empty($jsonMetadata)) {
+			$jsonMetadata = [
+				"tags" => !empty($tags) ? $tags : ["cn"],
+				"app" => !empty($app) ? $app : "steem4wp/1.0"
+			];
+		}
+		if (!$permlink) {
+			$permlink = sanitizePermlink($title);
+			if ($permlink === '' || $permlink === false) {
+				$permlink = \DateTime::createFromFormat('U.u', microtime(true))->format("Ymd\\tHisv\z");
+			}
+		}
+		$category = $jsonMetadata["tags"][0];
+		$parentPermlink = sanitizePermlink($category);
+		$parentAuthor = "";
+
+		return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
 	}
 
 	/**
@@ -277,12 +302,20 @@ class Steem
 	 * @param      string  $parentPermlink  The permlink of the parent comment
 	 * @param      string  $author   				The author of the comment
 	 * @param      string  $body   					The body of the comment
-	 * @param      string  $jsonMetadata   	The json data of the comment
+	 * @param      string  $tags   					The tags for the comment
+	 * @param      string  $app             The app name for the comment
+	 * @param      string  $jsonMetadata   	The json metadata of the comment
 	 *
 	 * @return     array   The response of the action
 	 */
-	public function replyToPost($parentAuthor, $parentPermlink, $author, $body, $jsonMetadata)
+	public function replyToPost($parentAuthor, $parentPermlink, $author, $body, $tags = null, $app = null, $jsonMetadata = null)
 	{
+		if (!$jsonMetadata) {
+			$jsonMetadata = [
+				"tags" => $tags || ["cn"],
+				"app" => $app || "steem4wp\/1.0"
+			];
+		}
 		return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, null, "", $body, $jsonMetadata);
 	}
 
@@ -374,6 +407,15 @@ class Steem
 		return $this->steemChain->getCurrentMeidanHistoryPrice();
 	}
 
+}
+
+function sanitizePermlink($permlink) {
+	$permlink = trim($permlink);
+	$permlink = preg_replace("/_|\s|\./", "-", $permlink);
+	$permlink = preg_replace("/[^\w-]/", "", $permlink);
+	$permlink = preg_replace("/[^a-zA-Z0-9-]/", "", $permlink);
+	$permlink = strtolower($permlink);
+	return $permlink;
 }
 
 ?>

@@ -58,7 +58,7 @@ class Steem_for_Wordpress_Settings {
 	public function __construct( $parent ) {
 		$this->parent = $parent;
 
-		$this->base = 'wpt_';
+		$this->base = 'steem_';
 
 		// Initialise settings.
 		add_action( 'init', array( $this, 'init_settings' ), 11 );
@@ -189,130 +189,138 @@ class Steem_for_Wordpress_Settings {
 	 */
 	private function settings_fields() {
 
-		$settings['standard'] = array(
-			'title'       => __( 'Standard', 'steem-for-wordpress' ),
-			'description' => __( 'These are fairly standard form input fields.', 'steem-for-wordpress' ),
+		$settings['steem'] = array(
+			'title'       => __( 'Steem 应用设置', 'steem-for-wordpress' ),
+			'description' => __( 'Steem 应用的基本设置，包括 App 主账户、密码等设置', 'steem-for-wordpress' ),
 			'fields'      => array(
 				array(
-					'id'          => 'text_field',
-					'label'       => __( 'Some Text', 'steem-for-wordpress' ),
-					'description' => __( 'This is a standard text field.', 'steem-for-wordpress' ),
+					'id'          => 'dapp_account',
+					'label'       => __( 'Steem DApp 账户', 'steem-for-wordpress' ),
+					'description' => __( '注册的Steem DApp的主账户，例如 wherein-io', 'steem-for-wordpress' ),
 					'type'        => 'text',
 					'default'     => '',
-					'placeholder' => __( 'Placeholder text', 'steem-for-wordpress' ),
+					'placeholder' => __( 'dapp-com', 'steem-for-wordpress' ),
 				),
 				array(
-					'id'          => 'password_field',
-					'label'       => __( 'A Password', 'steem-for-wordpress' ),
-					'description' => __( 'This is a standard password field.', 'steem-for-wordpress' ),
+					'id'          => 'dapp_wif',
+					'label'       => __( 'Steem DApp 账户的发帖密码', 'steem-for-wordpress' ),
+					'description' => __( '此处为发帖密码（posting key），请勿填写 active key, owner key, master key等秘钥', 'steem-for-wordpress' ),
 					'type'        => 'password',
 					'default'     => '',
-					'placeholder' => __( 'Placeholder text', 'steem-for-wordpress' ),
+					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
 				),
 				array(
-					'id'          => 'secret_text_field',
-					'label'       => __( 'Some Secret Text', 'steem-for-wordpress' ),
-					'description' => __( 'This is a secret text field - any data saved here will not be displayed after the page has reloaded, but it will be saved.', 'steem-for-wordpress' ),
-					'type'        => 'text_secret',
+					'id'          => 'dapp_default_tags',
+					'label'       => __( 'Steem DApp 发帖默认标签', 'steem-for-wordpress' ),
+					'description' => __( '用Steem DApp发帖时的默认标签，标签由英文、数字和短横（-）组成，标签之间用空格分开', 'steem-for-wordpress' ),
+					'type'        => 'text',
 					'default'     => '',
-					'placeholder' => __( 'Placeholder text', 'steem-for-wordpress' ),
+					'placeholder' => __( 'cn wherein', 'steem-for-wordpress' ),
 				),
-				array(
-					'id'          => 'text_block',
-					'label'       => __( 'A Text Block', 'steem-for-wordpress' ),
-					'description' => __( 'This is a standard text area.', 'steem-for-wordpress' ),
-					'type'        => 'textarea',
-					'default'     => '',
-					'placeholder' => __( 'Placeholder text for this textarea', 'steem-for-wordpress' ),
-				),
-				array(
-					'id'          => 'single_checkbox',
-					'label'       => __( 'An Option', 'steem-for-wordpress' ),
-					'description' => __( 'A standard checkbox - if you save this option as checked then it will store the option as \'on\', otherwise it will be an empty string.', 'steem-for-wordpress' ),
-					'type'        => 'checkbox',
-					'default'     => '',
-				),
-				array(
-					'id'          => 'select_box',
-					'label'       => __( 'A Select Box', 'steem-for-wordpress' ),
-					'description' => __( 'A standard select box.', 'steem-for-wordpress' ),
-					'type'        => 'select',
-					'options'     => array(
-						'drupal'    => 'Drupal',
-						'joomla'    => 'Joomla',
-						'wordpress' => 'WordPress',
-					),
-					'default'     => 'wordpress',
-				),
-				array(
-					'id'          => 'radio_buttons',
-					'label'       => __( 'Some Options', 'steem-for-wordpress' ),
-					'description' => __( 'A standard set of radio buttons.', 'steem-for-wordpress' ),
-					'type'        => 'radio',
-					'options'     => array(
-						'superman' => 'Superman',
-						'batman'   => 'Batman',
-						'ironman'  => 'Iron Man',
-					),
-					'default'     => 'batman',
-				),
-				array(
-					'id'          => 'multiple_checkboxes',
-					'label'       => __( 'Some Items', 'steem-for-wordpress' ),
-					'description' => __( 'You can select multiple items and they will be stored as an array.', 'steem-for-wordpress' ),
-					'type'        => 'checkbox_multi',
-					'options'     => array(
-						'square'    => 'Square',
-						'circle'    => 'Circle',
-						'rectangle' => 'Rectangle',
-						'triangle'  => 'Triangle',
-					),
-					'default'     => array( 'circle', 'triangle' ),
-				),
+				// array(
+				// 	'id'          => 'secret_text_field',
+				// 	'label'       => __( 'Some Secret Text', 'steem-for-wordpress' ),
+				// 	'description' => __( 'This is a secret text field - any data saved here will not be displayed after the page has reloaded, but it will be saved.', 'steem-for-wordpress' ),
+				// 	'type'        => 'text_secret',
+				// 	'default'     => '',
+				// 	'placeholder' => __( 'Placeholder text', 'steem-for-wordpress' ),
+				// ),
+				// array(
+				// 	'id'          => 'text_block',
+				// 	'label'       => __( 'A Text Block', 'steem-for-wordpress' ),
+				// 	'description' => __( 'This is a standard text area.', 'steem-for-wordpress' ),
+				// 	'type'        => 'textarea',
+				// 	'default'     => '',
+				// 	'placeholder' => __( 'Placeholder text for this textarea', 'steem-for-wordpress' ),
+				// ),
+				// array(
+				// 	'id'          => 'single_checkbox',
+				// 	'label'       => __( 'An Option', 'steem-for-wordpress' ),
+				// 	'description' => __( 'A standard checkbox - if you save this option as checked then it will store the option as \'on\', otherwise it will be an empty string.', 'steem-for-wordpress' ),
+				// 	'type'        => 'checkbox',
+				// 	'default'     => '',
+				// ),
+				// array(
+				// 	'id'          => 'select_box',
+				// 	'label'       => __( 'A Select Box', 'steem-for-wordpress' ),
+				// 	'description' => __( 'A standard select box.', 'steem-for-wordpress' ),
+				// 	'type'        => 'select',
+				// 	'options'     => array(
+				// 		'drupal'    => 'Drupal',
+				// 		'joomla'    => 'Joomla',
+				// 		'wordpress' => 'WordPress',
+				// 	),
+				// 	'default'     => 'wordpress',
+				// ),
+				// array(
+				// 	'id'          => 'radio_buttons',
+				// 	'label'       => __( 'Some Options', 'steem-for-wordpress' ),
+				// 	'description' => __( 'A standard set of radio buttons.', 'steem-for-wordpress' ),
+				// 	'type'        => 'radio',
+				// 	'options'     => array(
+				// 		'superman' => 'Superman',
+				// 		'batman'   => 'Batman',
+				// 		'ironman'  => 'Iron Man',
+				// 	),
+				// 	'default'     => 'batman',
+				// ),
+				// array(
+				// 	'id'          => 'multiple_checkboxes',
+				// 	'label'       => __( 'Some Items', 'steem-for-wordpress' ),
+				// 	'description' => __( 'You can select multiple items and they will be stored as an array.', 'steem-for-wordpress' ),
+				// 	'type'        => 'checkbox_multi',
+				// 	'options'     => array(
+				// 		'square'    => 'Square',
+				// 		'circle'    => 'Circle',
+				// 		'rectangle' => 'Rectangle',
+				// 		'triangle'  => 'Triangle',
+				// 	),
+				// 	'default'     => array( 'circle', 'triangle' ),
+				// ),
 			),
 		);
 
-		$settings['extra'] = array(
-			'title'       => __( 'Extra', 'steem-for-wordpress' ),
-			'description' => __( 'These are some extra input fields that maybe aren\'t as common as the others.', 'steem-for-wordpress' ),
-			'fields'      => array(
-				array(
-					'id'          => 'number_field',
-					'label'       => __( 'A Number', 'steem-for-wordpress' ),
-					'description' => __( 'This is a standard number field - if this field contains anything other than numbers then the form will not be submitted.', 'steem-for-wordpress' ),
-					'type'        => 'number',
-					'default'     => '',
-					'placeholder' => __( '42', 'steem-for-wordpress' ),
-				),
-				array(
-					'id'          => 'colour_picker',
-					'label'       => __( 'Pick a colour', 'steem-for-wordpress' ),
-					'description' => __( 'This uses WordPress\' built-in colour picker - the option is stored as the colour\'s hex code.', 'steem-for-wordpress' ),
-					'type'        => 'color',
-					'default'     => '#21759B',
-				),
-				array(
-					'id'          => 'an_image',
-					'label'       => __( 'An Image', 'steem-for-wordpress' ),
-					'description' => __( 'This will upload an image to your media library and store the attachment ID in the option field. Once you have uploaded an imge the thumbnail will display above these buttons.', 'steem-for-wordpress' ),
-					'type'        => 'image',
-					'default'     => '',
-					'placeholder' => '',
-				),
-				array(
-					'id'          => 'multi_select_box',
-					'label'       => __( 'A Multi-Select Box', 'steem-for-wordpress' ),
-					'description' => __( 'A standard multi-select box - the saved data is stored as an array.', 'steem-for-wordpress' ),
-					'type'        => 'select_multi',
-					'options'     => array(
-						'linux'   => 'Linux',
-						'mac'     => 'Mac',
-						'windows' => 'Windows',
-					),
-					'default'     => array( 'linux' ),
-				),
-			),
-		);
+		// $settings['extra'] = array(
+		// 	'title'       => __( 'Extra', 'steem-for-wordpress' ),
+		// 	'description' => __( 'These are some extra input fields that maybe aren\'t as common as the others.', 'steem-for-wordpress' ),
+		// 	'fields'      => array(
+		// 		array(
+		// 			'id'          => 'number_field',
+		// 			'label'       => __( 'A Number', 'steem-for-wordpress' ),
+		// 			'description' => __( 'This is a standard number field - if this field contains anything other than numbers then the form will not be submitted.', 'steem-for-wordpress' ),
+		// 			'type'        => 'number',
+		// 			'default'     => '',
+		// 			'placeholder' => __( '42', 'steem-for-wordpress' ),
+		// 		),
+		// 		array(
+		// 			'id'          => 'colour_picker',
+		// 			'label'       => __( 'Pick a colour', 'steem-for-wordpress' ),
+		// 			'description' => __( 'This uses WordPress\' built-in colour picker - the option is stored as the colour\'s hex code.', 'steem-for-wordpress' ),
+		// 			'type'        => 'color',
+		// 			'default'     => '#21759B',
+		// 		),
+		// 		array(
+		// 			'id'          => 'an_image',
+		// 			'label'       => __( 'An Image', 'steem-for-wordpress' ),
+		// 			'description' => __( 'This will upload an image to your media library and store the attachment ID in the option field. Once you have uploaded an imge the thumbnail will display above these buttons.', 'steem-for-wordpress' ),
+		// 			'type'        => 'image',
+		// 			'default'     => '',
+		// 			'placeholder' => '',
+		// 		),
+		// 		array(
+		// 			'id'          => 'multi_select_box',
+		// 			'label'       => __( 'A Multi-Select Box', 'steem-for-wordpress' ),
+		// 			'description' => __( 'A standard multi-select box - the saved data is stored as an array.', 'steem-for-wordpress' ),
+		// 			'type'        => 'select_multi',
+		// 			'options'     => array(
+		// 				'linux'   => 'Linux',
+		// 				'mac'     => 'Mac',
+		// 				'windows' => 'Windows',
+		// 			),
+		// 			'default'     => array( 'linux' ),
+		// 		),
+		// 	),
+		// );
 
 		$settings = apply_filters( $this->parent->_token . '_settings_fields', $settings );
 
