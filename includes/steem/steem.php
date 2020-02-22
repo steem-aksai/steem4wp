@@ -53,7 +53,14 @@ class Steem
 	 */
 	protected function getWif($account)
 	{
-		return get_option("steem_dapp_wif");
+		$wif = "";
+		if (function_exists('get_option')) {
+			$wif = get_option("steem_dapp_wif");
+		}
+		if (empty($wif)) {
+			$wif = getenv('STEEM_DAPP_WIF');
+		}
+		return $wif;
 	}
 
 
