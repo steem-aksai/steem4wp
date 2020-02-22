@@ -8,6 +8,21 @@ use SteemPHP\SteemAccount;
 use SteemPHP\SteemPost;
 use SteemPHP\SteemChain;
 
+if (!function_exists('write_log')) {
+
+	function write_content($content) {
+		file_put_contents('debug.log', $content . "\n", FILE_APPEND);
+	}
+
+	function write_log($log) {
+		if (is_array($log) || is_object($log)) {
+			write_content(print_r($log, true));
+		} else {
+			write_content($log);
+		}
+	}
+}
+
 class Steem
 {
 
@@ -289,11 +304,9 @@ class Steem
 				"app" => !empty($app) ? $app : "steem4wp/1.0"
 			];
 		}
-		if (!$permlink) {
-			$permlink = sanitizePermlink($title);
-			if ($permlink === '' || $permlink === false) {
-				$permlink = \DateTime::createFromFormat('U.u', microtime(true))->format("Ymd\\tHisv\z");
-			}
+		if (empty($permlink)) {
+			$timestamp = \DateTime::createFromFormat('U.u', microtime(true))->format("Ymd\\tHisv\z");
+			$permlink = sanitizePermlink($title) . '-' . $timestamp;
 		}
 		$category = $jsonMetadata["tags"][0];
 		$parentPermlink = sanitizePermlink($category);
