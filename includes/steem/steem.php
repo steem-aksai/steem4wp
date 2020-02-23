@@ -306,8 +306,14 @@ class Steem
 		}
 		if (empty($permlink)) {
 			$timestamp = \DateTime::createFromFormat('U.u', microtime(true))->format("Ymd\\tHisv\z");
-			$permlink = sanitizePermlink($title) . '-' . $timestamp;
+			$permlink = sanitizePermlink($title);
+			if (empty(preg_replace("/-/", "", $permlink))) {
+				$permlink = $timestamp;
+			} else {
+				$permlink = $permlink . '-' . $timestamp;
+			}
 		}
+		$body = sanitizeBody($body);
 		$category = $jsonMetadata["tags"][0];
 		$parentPermlink = sanitizePermlink($category);
 		$parentAuthor = "";
@@ -332,10 +338,11 @@ class Steem
 	{
 		if (!$jsonMetadata) {
 			$jsonMetadata = [
-				"tags" => $tags || ["cn"],
-				"app" => $app || "steem4wp\/1.0"
+				"tags" => !empty($tags) ? $tags : ["cn"],
+				"app" => !empty($app) ? $app : "steem4wp/1.0"
 			];
 		}
+		$body = sanitizeBody($body);
 		return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, null, "", $body, $jsonMetadata);
 	}
 
@@ -436,6 +443,16 @@ function sanitizePermlink($permlink) {
 	$permlink = preg_replace("/[^a-zA-Z0-9-]/", "", $permlink);
 	$permlink = strtolower($permlink);
 	return $permlink;
+}
+
+function sanitizeBody($body) {
+	$body = preg_replace("/<section[^>]*>/", "", $body);
+	$body = preg_replace("/<\/section>/", "", $body);
+	$body = preg_replace("/<span[^>]*>/", "", $body);
+	$body = preg_replace("/<\/span>/", "", $body);
+	$body = preg_replace("/\t/", "    ", $body);
+	$body = trim($body);
+	return $body;
 }
 
 ?>
