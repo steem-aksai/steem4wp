@@ -29,7 +29,7 @@ require_once 'includes/class-steem-for-wordpress-settings.php';
 require_once 'includes/lib/class-steem-for-wordpress-admin-api.php';
 require_once 'includes/lib/class-steem-for-wordpress-post-type.php';
 require_once 'includes/lib/class-steem-for-wordpress-taxonomy.php';
-require_once 'includes/steem/steem.php';
+require_once 'includes/steem.php';
 
 /**
  * Returns the main instance of Steem_for_Wordpress to prevent the need to use globals.
@@ -48,3 +48,11 @@ function steem_for_wordpress() {
 }
 
 steem_for_wordpress();
+
+define('STEEM_REST_API_DIR', plugin_dir_path(__FILE__));
+
+// after all plugins are loaded
+add_action( 'plugins_loaded', 'steem4wp_plugins_loaded' );
+function steem4wp_plugins_loaded() {
+	include( STEEM_REST_API_DIR.'includes/router.php' );
+}
