@@ -1,0 +1,8 @@
+node*
+vendor*
+.vscode
+.DS_Store
+*.cache
+composer.lock
+build/
+*.log
