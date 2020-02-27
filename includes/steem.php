@@ -12,7 +12,7 @@ if (!function_exists('write_log')) {
 
 	function write_content($content) {
 		$date = (new DateTime())->format("Y/m/d H:i:s.u");
-		file_put_contents('/tmp/wp-debug.log', "[" . $date . "] " . $content . "\n", FILE_APPEND);
+		file_put_contents('wp-debug.log', "[" . $date . "] " . $content . "\n", FILE_APPEND);
 	}
 
 	function write_log($log) {
@@ -335,11 +335,18 @@ class Steem
 	 *
 	 * @return     array   The response of the action
 	 */
-	public function replyToPost($parentAuthor, $parentPermlink, $author, $body, $tags = null, $app = null, $jsonMetadata = null)
+	public function replyToPost($parentAuthor, $parentPermlink, $author, $body, $app = null, $jsonMetadata = null)
 	{
+		$post = $this->getPostContent($parentAuthor, $parentPermlink);
+		if (!empty($post) && array_key_exists('json_metadata', $post)) {
+			$parentJsonMetadata = json_decode($post['json_metadata'], true);
+			$tags = array_key_exists('tags', $parentJsonMetadata) ? $parentJsonMetadata['tags'] : ["cn"];
+		} else {
+			$tags = ['cn'];
+		}
 		if (!$jsonMetadata) {
 			$jsonMetadata = [
-				"tags" => !empty($tags) ? $tags : ["cn"],
+				"tags" => $tags,
 				"app" => !empty($app) ? $app : "steem4wp/1.0"
 			];
 		}

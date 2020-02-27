@@ -1,8 +1,7 @@
 <?php
 
 include (__DIR__).'/../../vendor/autoload.php';
-include (__DIR__).'/../steem/steem.php';
-// include (__DIR__).'/../../steem-for-wordpress.php';
+include (__DIR__).'/../steem.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -89,6 +88,11 @@ class SteemTest extends TestCase
 	public function testDeletePost()
 	{
 		$this->assertIsInt($this->steem->deletePost("koei",  "steem4wp-"));
+	}
+
+	public function testReplyToPost()
+	{
+		$this->assertIsInt($this->steem->replyToPost("koei",  "steem4wp-", "koei", "Steem4WP 回复测试"));
 	}
 
 	public function testVote()
