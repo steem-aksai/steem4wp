@@ -13,9 +13,3 @@ add_action( 'rest_api_init', function () {
     $control->register_routes();
   }
 });
-
-function load_async_actions() {
-  new Steem_Post_Async_Task();
-}
-
-load_async_actions();

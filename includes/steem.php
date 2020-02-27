@@ -11,7 +11,8 @@ use SteemPHP\SteemChain;
 if (!function_exists('write_log')) {
 
 	function write_content($content) {
-		file_put_contents('debug.log', $content . "\n", FILE_APPEND);
+		$date = (new DateTime())->format("Y/m/d H:i:s.u");
+		file_put_contents('/tmp/wp-debug.log', "[" . $date . "] " . $content . "\n", FILE_APPEND);
 	}
 
 	function write_log($log) {

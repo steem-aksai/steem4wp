@@ -135,9 +135,9 @@ class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
 
     if (!$this->steem) {
       $this->steem = new Steem();
-    }
+		}
     if ($this->steem) {
-      $tx = $this->steem->createPost($user->user_login, $post->post_title, $post->post_content);
+			$tx = $this->steem->createPost($user->user_login, $post->post_title, $post->post_content);
       // write_log("transaction");
       // write_log($tx);
       // write_log("----------");
@@ -145,10 +145,9 @@ class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
         $operation = $tx['operations'][0][1];
         update_post_meta( $post_id, 'steem_author', $operation['author'] );
         update_post_meta( $post_id, 'steem_permlink', $operation['permlink'] );
-        write_log("createPost");
-        write_log($operation);
-        write_log("----------");
-
+        // write_log("createPost");
+        // write_log($operation);
+        // write_log("----------");
         $result["status"] = 200;
         $result["code"] = "success";
         $result["message"] = 'Post created on Steem sueccessfully';
@@ -206,8 +205,6 @@ class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
 	}
 
 	public function delete_posts( $request ) {
-    write_log("delete_posts 1");
-
 		$access_token = base64_decode($request['access_token']);
 		$users = Steem_Auth::login( $access_token );
 		if ( !$users ) {
@@ -220,36 +217,23 @@ class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
 		$post = get_post( $post_id );
     $author_id = (int)$post->post_author;
 
-    write_log("delete_posts 2");
-
 		if( ( $user_id != $author_id ) && ( in_array( 'administrator', $user->roles ) || in_array( 'superadmin', $user->roles ) || in_array( 'editor', $user->roles ) ) ) {
 			return new WP_Error( 'error', 'You have no permission to delete post', array( 'status' => 400 ) );
 		}
 
-    write_log("delete_posts 3");
-
-    // $result["status"] = 500;
-    // $result["code"] = "success";
-    // $result["message"] = "Deletion falied";
-		// $response  = rest_ensure_response( $result );
-		// return $response;
-
-    if (!$this->steem) {
+		if (!$this->steem) {
       $this->steem = new Steem();
     }
     if ($this->steem) {
       $steem_author = get_post_meta( $post_id, 'steem_author', true );
       $steem_permlink = get_post_meta( $post_id, 'steem_permlink', true );
-
-      sleep(30);
-      write_log("delete_posts 4");
       if (!empty($steem_author) && !empty($steem_permlink)) {
         $tx = $this->steem->deletePost($steem_author, $steem_permlink);
-        write_log("deletion transaction");
-        write_log($steem_author);
-        write_log($steem_permlink);
-        write_log($tx);
-        write_log("----------");
+        // write_log("deletion transaction");
+        // write_log($steem_author);
+        // write_log($steem_permlink);
+        // write_log($tx);
+        // write_log("----------");
         if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
           $result["status"] = 200;
           $result["code"] = "success";
@@ -286,118 +270,4 @@ class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
 	}
 
 }
-
-if (class_exists('WP_Async_Task')) {
-
-  class Steem_Post_Async_Task extends WP_Async_Task {
-
-    protected $action = 'steem_post';
-
-    /**
-     * @var $steem
-     *
-     * $steem will be the Steem object that interact with Steem blockchain
-     */
-    protected $steem;
-
-    /**
-     * Prepare data for the asynchronous request
-     *
-     * @throws Exception If for any reason the request should not happen
-     *
-     * @param array $data An array of data sent to the hook
-     *
-     * @return array
-     */
-    protected function prepare_data( $data ) {
-      return [
-        'operation' => $data[0],
-        'user_id' => $data[1],
-        'post_id' => $data[2]
-      ];
-    }
-
-    /**
-     * Run the async task action
-     */
-    protected function run_action() {
-      $operation = $_POST['operation'];
-      $user_id = $_POST['user_id'];
-      $post_id = $_POST['post_id'];
-      // $post = get_post( $post_id );
-      // if ( $post ) {
-        // Assuming $this->action is 'save_post'
-        // do_action( "wp_async_$this->action", $post->ID, $post );
-      // }
-      switch ($operation) {
-        case "create_post":
-          $this->create_post($user_id, $post_id);
-          break;
-        case "delete_post":
-          $this->delete_post($post_id);
-          break;
-      }
-    }
-
-    protected function create_post($user_id, $post_id) {
-      $user = get_user_by( 'ID', $user_id );
-
-      $post_id = $request['post_id'];
-      $post = get_post( $post_id );
-
-      if (!$this->steem) {
-        $this->steem = new Steem();
-      }
-      if ($this->steem) {
-        $tx = $this->steem->createPost($user->user_login, $post->post_title, $post->post_content);
-        // write_log("transaction");
-        // write_log($tx);
-        // write_log("----------");
-        if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
-          $operation = $tx['operations'][0][1];
-          update_post_meta( $post_id, 'steem_author', $operation['author'] );
-          update_post_meta( $post_id, 'steem_permlink', $operation['permlink'] );
-          write_log("createPost");
-          write_log($operation);
-          write_log("----------");
-
-          // $result["status"] = 200;
-          // $result["code"] = "success";
-          // $result["message"] = 'Post created on Steem sueccessfully';
-          // $response  = rest_ensure_response( $result );
-          // return $response;
-        }
-      }
-    }
-
-    protected function delete_post($post_id) {
-      if (!$this->steem) {
-        $this->steem = new Steem();
-      }
-      if ($this->steem) {
-        $steem_author = get_post_meta( $post_id, 'steem_author', true );
-        $steem_permlink = get_post_meta( $post_id, 'steem_permlink', true );
-
-        sleep(30);
-        write_log("delete_posts 4");
-        if (!empty($steem_author) && !empty($steem_permlink)) {
-          $tx = $this->steem->deletePost($steem_author, $steem_permlink);
-          write_log("deletion transaction");
-          write_log($steem_author);
-          write_log($steem_permlink);
-          write_log($tx);
-          write_log("----------");
-          if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
-            // $result["status"] = 200;
-            // $result["code"] = "success";
-            // $result["message"] = "Deletion succeeded";
-            // $response  = rest_ensure_response( $result );
-            // return $response;
-          }
-        }
-      }
-    }
-  }
-}
-
 
