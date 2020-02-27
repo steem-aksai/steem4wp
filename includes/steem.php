@@ -10,9 +10,15 @@ use SteemPHP\SteemChain;
 
 if (!function_exists('write_log')) {
 
+	if (defined('STEEM_REST_API_DIR')) {
+		define('STEEM_WP_DEBUG_LOG', '/tmp/wp-debug.log');
+	} else {
+		define('STEEM_WP_DEBUG_LOG', 'wp-debug.log');
+	}
+
 	function write_content($content) {
 		$date = (new DateTime())->format("Y/m/d H:i:s.u");
-		file_put_contents('wp-debug.log', "[" . $date . "] " . $content . "\n", FILE_APPEND);
+		file_put_contents(STEEM_WP_DEBUG_LOG, "[" . $date . "] " . $content . "\n", FILE_APPEND);
 	}
 
 	function write_log($log) {

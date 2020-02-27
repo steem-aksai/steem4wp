@@ -15,7 +15,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
  *
  * @see WP_REST_Controller
  */
-class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
+class WP_Steem_REST_Post_Router extends WP_REST_Controller {
 
 	/**
 	 * Instance of a post meta fields object.
@@ -158,7 +158,7 @@ class WP_Steem_REST_Posts_Router extends WP_REST_Controller {
 
     $result["status"] = 500;
     $result["code"] = "success";
-    $result["message"] = "Failed ot create post on Steem";
+    $result["message"] = "Failed to create post on Steem";
 		$response  = rest_ensure_response( $result );
 		return $response;
 
