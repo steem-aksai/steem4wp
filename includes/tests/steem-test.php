@@ -95,19 +95,19 @@ class SteemTest extends TestCase
 		$this->assertIsInt($this->steem->replyToPost("koei",  "steem4wp-", "koei", "Steem4WP 回复测试"));
 	}
 
-	public function testVote()
+	public function testVotePost()
 	{
-		$this->assertIsInt($this->SteemPost->vote("...", "koei", "koei", "re-koei-steempeak-cn-20200203t130104730z", 20));
+		$this->assertIsInt($this->steem->upvotePost("koei", "koei", "steem4wp-", 20));
 	}
 
-	public function testUnVote()
+	public function testUnVotePost()
 	{
-		$this->assertIsInt($this->SteemPost->unvote("...", "koei", "koei", "re-koei-steempeak-cn-20200203t130104730z"));
+		$this->assertIsInt($this->steem->unvotePost("koei", "koei", "steem4wp-"));
 	}
 
-	public function testReblog()
+	public function testForwardPost()
 	{
-		$this->assertIsInt($this->SteemPost->reblog("...", "koei", "robertyan", "awesome-steem-for-steem-developers"));
+		$this->assertIsInt($this->steem->forwardPost("koei", "robertyan", "awesome-steem-for-steem-developers"));
 	}
 
 }

@@ -57,10 +57,6 @@ class WP_Steem_REST_Comment_Router extends WP_REST_Controller {
 
 	}
 
-	public function remove_excerpt_more() {
-		return '';
-	}
-
 	/**
 	 * Registers the routes for the objects of the controller.
 	 *
