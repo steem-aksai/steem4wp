@@ -128,8 +128,8 @@ class Steem_for_Wordpress_Settings {
 			array(
 				'location'    => 'options', // Possible settings: options, menu, submenu.
 				'parent_slug' => 'options-general.php',
-				'page_title'  => __( 'Plugin Settings', 'steem-for-wordpress' ),
-				'menu_title'  => __( 'Plugin Settings', 'steem-for-wordpress' ),
+				'page_title'  => __( 'Steem for Wordpress', 'steem-for-wordpress' ),
+				'menu_title'  => __( 'Steem for Wordpress', 'steem-for-wordpress' ),
 				'capability'  => 'manage_options',
 				'menu_slug'   => $this->parent->_token . '_settings',
 				'function'    => array( $this, 'settings_page' ),
@@ -409,7 +409,7 @@ class Steem_for_Wordpress_Settings {
 
 		// Build page HTML.
 		$html      = '<div class="wrap" id="' . $this->parent->_token . '_settings">' . "\n";
-			$html .= '<h2>' . __( 'Plugin Settings', 'steem-for-wordpress' ) . '</h2>' . "\n";
+			$html .= '<h2>' . __( 'Steem for Wordpress', 'steem-for-wordpress' ) . '</h2>' . "\n";
 
 			$tab = '';
 		//phpcs:disable
