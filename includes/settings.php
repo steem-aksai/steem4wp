@@ -15,7 +15,7 @@ if ( !defined( 'ABSPATH' ) ) exit;
  *
  * @see WP_REST_Controller
  */
-class WP_Steem_REST_App_Router extends WP_REST_Controller {
+class WP_Steem_REST_Settings_Router extends WP_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -29,7 +29,7 @@ class WP_Steem_REST_App_Router extends WP_REST_Controller {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'app';
+	protected $rest_base = 'settings';
 
 	/**
 	 * @var $steem
@@ -60,8 +60,8 @@ class WP_Steem_REST_App_Router extends WP_REST_Controller {
 			array(
 				'methods'             	=> WP_REST_Server::READABLE,
 				'callback'            	=> array( $this, 'app_settings' ),
-				'permission_callback' 	=> array( $this, 'wp_app_permissions_check' ),
-				'args'                	=> $this->wp_app_collection_params(),
+				'permission_callback' 	=> array( $this, 'wp_settings_permissions_check' ),
+				'args'                	=> $this->wp_settings_collection_params(),
 			)
 		));
 
@@ -76,7 +76,7 @@ class WP_Steem_REST_App_Router extends WP_REST_Controller {
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
 	 */
-	public function wp_app_permissions_check( $request ) {
+	public function wp_settings_permissions_check( $request ) {
 		return true;
 	}
 
@@ -87,7 +87,7 @@ class WP_Steem_REST_App_Router extends WP_REST_Controller {
 	 *
 	 * @return array Collection parameters.
 	 */
-	public function wp_app_collection_params() {
+	public function wp_settings_collection_params() {
 		$params = array();
 		return $params;
 	}
