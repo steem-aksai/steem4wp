@@ -217,6 +217,14 @@ class Steem_for_Wordpress_Settings {
 					'default'     => '',
 					'placeholder' => __( 'cn wherein', 'steem-for-wordpress' ),
 				),
+				array(
+					'id'          => 'api_node_url',
+					'label'       => __( 'Steem API 节点地址', 'steem-for-wordpress' ),
+					'description' => __( 'Steem API 节点的URL，例如 https://anyx.io, https://steemd.minnowsupportproject.org, https://api.steemit.com 等等', 'steem-for-wordpress' ),
+					'type'        => 'text',
+					'default'     => 'https://steemd.minnowsupportproject.org',
+					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
+				),
 				// array(
 				// 	'id'          => 'secret_text_field',
 				// 	'label'       => __( 'Some Secret Text', 'steem-for-wordpress' ),
