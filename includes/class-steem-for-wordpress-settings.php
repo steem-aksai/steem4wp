@@ -220,7 +220,7 @@ class Steem_for_Wordpress_Settings {
 				array(
 					'id'          => 'api_node_url',
 					'label'       => __( 'Steem API 节点地址', 'steem-for-wordpress' ),
-					'description' => __( 'Steem API 节点的URL，例如 https://anyx.io, https://steemd.minnowsupportproject.org, https://api.steemit.com 等等', 'steem-for-wordpress' ),
+					'description' => __( 'Steem API 节点的URL，例如 https://anyx.io, https://steemd.minnowsupportproject.org, https://api.steemit.com', 'steem-for-wordpress' ),
 					'type'        => 'text',
 					'default'     => 'https://steemd.minnowsupportproject.org',
 					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
