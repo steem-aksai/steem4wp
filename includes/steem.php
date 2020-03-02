@@ -65,9 +65,10 @@ class Steem
 		if (empty($node)) {
 			if (function_exists('get_option')) {
 				$node = get_option("steem_api_node_url");
-			} else {
-				$node = "https://anyx.io";
 			}
+		}
+		if (empty($node)) {
+			$node = "https://anyx.io";
 		}
 
 		$this->node = trim($node);
