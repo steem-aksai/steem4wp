@@ -210,6 +210,22 @@ class Steem_for_Wordpress_Settings {
 					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
 				),
 				array(
+					'id'          => 'dapp_steemid_password',
+					'label'       => __( 'Steem DApp 的 SteemID服务密码', 'steem-for-wordpress' ),
+					'description' => __( 'DApp', 'steem-for-wordpress' ),
+					'type'        => 'password',
+					'default'     => '',
+					'placeholder' => __( 'password', 'steem-for-wordpress' ),
+				),
+				array(
+					'id'          => 'dapp_steemid_secret',
+					'label'       => __( 'Steem DApp 的 SteemID服务验证密码', 'steem-for-wordpress' ),
+					'description' => __( 'DApp', 'steem-for-wordpress' ),
+					'type'        => 'password',
+					'default'     => '',
+					'placeholder' => __( 'secret', 'steem-for-wordpress' ),
+				),
+				array(
 					'id'          => 'dapp_default_tags',
 					'label'       => __( 'Steem DApp 发帖默认标签', 'steem-for-wordpress' ),
 					'description' => __( '用Steem DApp发帖时的默认标签，标签由英文、数字和短横（-）组成，标签之间用空格分开', 'steem-for-wordpress' ),
