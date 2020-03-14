@@ -65,10 +65,41 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			)
 		));
 
+		register_rest_route( $this->namespace, '/'.$this->rest_base.'/exists', array(
+			array(
+				'methods'             	=> WP_REST_Server::READABLE,
+				'callback'            	=> array( $this, 'wp_user_exists_on_steem' ),
+				'permission_callback' 	=> array( $this, 'wp_user_steem_exists_permissions_check' ),
+				'args'                	=> $this->wp_user_steem_exists_collection_params(),
+			)
+		));
+
+	}
+
+
+	/**
+	 * Checks if a given request has access to check whether user exists.
+	 *
+	 * @since 4.7.0
+	 * @access public
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function wp_user_steem_exists_permissions_check( $request ) {
+
+		$username = isset($request['username']) ? $request['username'] : "";
+
+		if( empty($username) ) {
+			return new WP_Error( 'error', '缺少用户名', array( 'status' => 400 ) );
+		}
+
+		return true;
+
 	}
 
 	/**
-	 * Checks if a given request has access to read posts.
+	 * Checks if a given request has access to login as a user.
 	 *
 	 * @since 4.7.0
 	 * @access public
@@ -96,6 +127,25 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 
 		return true;
 
+	}
+
+
+	/**
+	 * Retrieves the query params for the posts collection.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @return array Collection parameters.
+	 */
+	public function wp_user_steem_exists_collection_params() {
+		$params = array();
+		$params['username'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "Steem用户名",
+			'type'	=>	 "string"
+		);
+		return $params;
 	}
 
 	/**
@@ -128,6 +178,31 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		return $params;
 	}
 
+
+	/**
+	 *
+	 * @since 4.7.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function wp_user_exists_on_steem( $request ) {
+		$params = $request->get_params();
+		$steemId = $params['username'];
+		if (!$this->steem && class_exists('Steem')) {
+			$this->steem = new Steem();
+		}
+		$user_data = $this->steem->getAccount($steemId);
+		if (!$user_data) {
+			return new WP_Error( 'error', '获取Steem用户数据为空', array( 'status' => 500, 'errcode' => $user_data ) );
+		} else {
+			$user_profile = $user_data['profile'];
+			$response = rest_ensure_response( $user_profile );
+			return $response;
+		}
+
+	}
 
 	/**
 	 *
