@@ -504,10 +504,11 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			if (!empty($steemId)) {
 				return $this->login_by_steem($steemId, $openId, $session['session_key'], null);
 			} else {
-				$data = array( 'status' => 500, 'error' => 'no Steem users found', 'message' => '没有找到相关Steem用户' );
 				write_log("login_by_wechat failed.");
-				$response  = rest_ensure_response( $data );
-				return $response;
+				// $result = array( 'status' => 500, 'error' => 'no Steem users found', 'message' => '没有找到相关Steem用户' );
+				// $response  = rest_ensure_response( $result );
+				// return $response;
+				return new WP_Error( 'error', '没有找到对应的Steem用户', array( 'status' => 404, 'openId' => $openId ) );
 			}
 		}
 	}
