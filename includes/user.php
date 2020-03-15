@@ -310,6 +310,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		$expired_in = $params['expired_in'];
 
 		$access_token = base64_decode($access_token);
+		SteemID::bind($openId, $steemId);
 
 		return $this->login_by_steem($steemId, $openId, $access_token, $expired_in);
 
