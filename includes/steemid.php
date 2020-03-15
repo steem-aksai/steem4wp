@@ -18,13 +18,8 @@ class SteemID {
     if (function_exists('get_option')) {
       $dapp_id = get_option('steem_dapp_account');
       $dapp_password = get_option('steem_dapp_steemid_password');
-      $dapp_secret = get_option('steem_dapp_dapp_steemid_secret');
+      $dapp_secret = get_option('steem_dapp_steemid_secret');
     }
-    // else {
-    //   $dapp_id = getenv('STEEM_DAPP_ACCOUNT');
-    //   $dapp_password = getenv('STEEM_DAPP_STEEMID_PASSWORD');
-    //   $dapp_secret = getenv('STEEM_DAPP_STEEMID_SECRET');
-    // }
     if (empty($dapp_id) || empty($dapp_password) || empty($dapp_secret)) {
       return null;
     }
@@ -59,7 +54,12 @@ class SteemID {
       return null;
     } else {
       $body = wp_remote_retrieve_body($response);
-      return $body->data->username;
+      $data = json_decode( $body, true );
+      if (array_key_exists('username', $data) && !empty($data['username'])) {
+        return $data['username'];
+      } else {
+        return null;
+      }
     }
   }
 
