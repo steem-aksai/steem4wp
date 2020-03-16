@@ -339,10 +339,10 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			$data = [
 				'exists' => false
 			];
-		} else if (array_key_exists('profile', $user_data) && !empty($user_data['profile'])) {
+		} else if (array_key_exists('name', $user_data) && !empty($user_data['name'])) {
 			$data = [
 				'exists' => true,
-				'profile' => $user_data['profile']
+				'name' => $user_data['name']
 			];
 		} else {
 			return new WP_Error( 'error', '获取Steem用户数据出错', array( 'status' => 500, 'errcode' => $user_data ) );
