@@ -83,6 +83,15 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			)
 		));
 
+		register_rest_route( $this->namespace, '/'.$this->rest_base.'/register', array(
+			array(
+				'methods'             	=> WP_REST_Server::CREATABLE,
+				'callback'            	=> array( $this, 'wp_user_register_steem_account' ),
+				'permission_callback' 	=> array( $this, 'wp_user_steem_register_permissions_check' ),
+				'args'                	=> $this->wp_user_steem_register_collection_params(),
+			)
+		));
+
 	}
 
 
@@ -175,6 +184,31 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 
 	}
 
+	/**
+	 * Checks if a given request has access to login as a user.
+	 *
+	 * @since 4.7.0
+	 * @access public
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function wp_user_steem_register_permissions_check( $request ) {
+
+		$username = isset($request['username']) ? $request['username'] : "";
+		$openId = isset($request['openId']) ? $request['openId'] : "";
+
+		if( empty($username) ) {
+			return new WP_Error( 'error', '缺少用户名', array( 'status' => 400 ) );
+		}
+
+		if( empty($openId) ) {
+			return new WP_Error( 'error', '缺少微信openId', array( 'status' => 400 ) );
+		}
+
+		return true;
+
+	}
 
 
 	/**
@@ -261,6 +295,31 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		return $params;
 	}
 
+
+	/**
+	 * Retrieves the query params for the posts collection.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @return array Collection parameters.
+	 */
+	public function wp_user_steem_register_collection_params() {
+		$params = array();
+		$params['username'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "Steem用户名",
+			'type'	=>	 "string"
+		);
+		$params['openId'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "微信OpenID",
+			'type'	=>	 "string"
+		);
+		return $params;
+	}
+
 	/**
 	 *
 	 * @since 4.7.0
@@ -277,13 +336,19 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		}
 		$user_data = $this->steem->getAccount($steemId);
 		if (!$user_data) {
-			return new WP_Error( 'error', '获取Steem用户数据为空', array( 'status' => 500, 'errcode' => $user_data ) );
+			$data = [
+				'exists' => false
+			];
+		} else if (array_key_exists('profile', $user_data) && !empty($user_data['profile'])) {
+			$data = [
+				'exists' => true,
+				'profile' => $user_data['profile']
+			];
 		} else {
-			$user_profile = $user_data['profile'];
-			$response = rest_ensure_response( $user_profile );
-			return $response;
+			return new WP_Error( 'error', '获取Steem用户数据出错', array( 'status' => 500, 'errcode' => $user_data ) );
 		}
-
+		$response = rest_ensure_response( $data );
+		return $response;
 	}
 
 	/**
@@ -490,6 +555,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		$user_data = json_decode( $data, true );
 		$platform = "wechat";
 		$openId = $session['openid'];
+		$access_token = $session['session_key'];
 		$users = get_users( "openid={$openId}" );
 		if(!empty($users)) {
 			$current_user = $users[0];
@@ -498,12 +564,12 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		// if find steemId locally, return user data
 		if (!empty($current_user) && !empty($current_user->steemId)) {
 			write_log('login_by_wechat from local database');
-			return $this->login_by_steem($current_user->steemId, $openId, $session['session_key'], null);
+			return $this->login_by_steem($current_user->steemId, $openId, $access_token, null);
 		} else {
 			$steemId = SteemID::find($openId);
 			write_log("login_by_wechat with SteemID {$steemId}");
 			if (!empty($steemId)) {
-				return $this->login_by_steem($steemId, $openId, $session['session_key'], null);
+				return $this->login_by_steem($steemId, $openId, $access_token, null);
 			} else {
 				write_log("login_by_wechat failed.");
 				// $result = array( 'status' => 500, 'error' => 'no Steem users found', 'message' => '没有找到相关Steem用户' );
@@ -523,9 +589,21 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 
-	public function wp_user_register_on_steem( $request ) {
+	public function wp_user_register_steem_account( $request ) {
+		$params = $request->get_params();
+		$steemId = $params['username'];
+		$openId = $params['openId'];
 
-
+		$username = SteemID::new($openId, $steemId);
+		if ($username) {
+			$data = [
+				'username' => $username
+			];
+			$response = rest_ensure_response( $data );
+			return $response;
+		} else {
+			return new WP_Error( 'error', "注册Steem账户 @{$steemId} 失败", array( 'status' => 500 ) );
+		}
 	}
 }
 
