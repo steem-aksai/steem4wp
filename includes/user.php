@@ -59,6 +59,15 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		register_rest_route( $this->namespace, '/'.$this->rest_base.'/login', array(
 			array(
 				'methods'             	=> WP_REST_Server::CREATABLE,
+				'callback'            	=> array( $this, 'wp_user_login_by_steem_deprecated' ),
+				'permission_callback' 	=> array( $this, 'wp_user_steem_login_permissions_check_deprecated' ),
+				'args'                	=> $this->wp_user_steem_login_collection_params_deprecated(),
+			)
+		));
+
+		register_rest_route( $this->namespace, '/'.$this->rest_base.'/login/wechat', array(
+			array(
+				'methods'             	=> WP_REST_Server::CREATABLE,
 				'callback'            	=> array( $this, 'wp_user_login_by_wechat' ),
 				'permission_callback' 	=> array( $this, 'wp_user_wechat_login_permissions_check' ),
 				'args'                	=> $this->wp_user_wechat_login_collection_params(),
@@ -151,6 +160,39 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		return true;
 
 	}
+
+	/**
+	 * Checks if a given request has access to login as a user.
+	 *
+	 * @since 4.7.0
+	 * @access public
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return true|WP_Error True if the request has read access, WP_Error object otherwise.
+	 */
+	public function wp_user_steem_login_permissions_check_deprecated( $request ) {
+
+		$username = isset($request['username']) ? $request['username'] : "";
+		$token = isset($request['token']) ? $request['token'] : "";
+		$expiredIn = isset($request['expired_in']) ? $request['expired_in'] : "";
+
+		if( empty($username) ) {
+			return new WP_Error( 'error', '缺少用户名', array( 'status' => 400 ) );
+		}
+
+		if( empty($token) ) {
+			return new WP_Error( 'error', '缺少登录token信息', array( 'status' => 400 ) );
+		}
+
+		if( empty($expiredIn) ) {
+			return new WP_Error( 'error', '缺少登录过期时间信息', array( 'status' => 400 ) );
+		}
+
+		return true;
+
+	}
+
+
 
 
 	/**
@@ -264,6 +306,38 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		);
 		return $params;
 	}
+
+
+	/**
+	 * Retrieves the query params for the posts collection.
+	 *
+	 * @since 4.7.0
+	 *
+	 * @return array Collection parameters.
+	 */
+	public function wp_user_steem_login_collection_params_deprecated() {
+		$params = array();
+		$params['username'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "Steem用户名",
+			'type'	=>	 "string"
+		);
+		$params['token'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "steemconnect登录时的token",
+			'type'	=>	 "string"
+		);
+		$params['expired_in'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "steemconnect登录超时时间",
+			'type'	=>	 "double"
+		);
+		return $params;
+	}
+
 
 	/**
 	 * Retrieves the query params for the posts collection.
@@ -380,6 +454,31 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		return $this->login_by_steem($steemId, $openId, $access_token, $expired_in);
 
 	}
+
+	/**
+	 *
+	 * @since 4.7.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+
+	public function wp_user_login_by_steem_deprecated( $request ) {
+		date_default_timezone_set(get_option('timezone_string'));
+
+		$params = $request->get_params();
+
+		$steemId = $params['username'];
+		$access_token = $params['token'];
+		$expired_in = $params['expired_in'];
+
+		$access_token = base64_decode($access_token);
+
+		return $this->login_by_steem($steemId, $openId, $access_token, $expired_in);
+
+	}
+
 
 	protected function login_by_steem($steemId, $openId, $access_token, $expired_in) {
 		$expire_date = date('Y-m-d H:i:s', time()+72000); // date('Y-m-d H:i:s', time()+$expired_in);
