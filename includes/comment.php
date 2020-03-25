@@ -155,21 +155,25 @@ class WP_Steem_REST_Comment_Router extends WP_REST_Controller {
     if ($this->steem && !empty($parent_author) && !empty($parent_permlink)) {
 			if (empty($comment->comment_type)) { // 评论
 				$tx = $this->steem->replyToPost($parent_author, $parent_permlink, $user->user_login, $comment->comment_content);
-				// write_log("transaction");
-				// write_log($tx);
-				// write_log("----------");
 				if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
 					$operation = $tx['operations'][0][1];
 					update_comment_meta( $comment_id, 'steem_author', $operation['author'] );
 					update_comment_meta( $comment_id, 'steem_permlink', $operation['permlink'] );
-					// write_log("createComment");
-					// write_log($operation);
-					// write_log("----------");
+					write_log("createComment Succeeded");
+					write_log($operation);
+					write_log("----------");
+
+					$this->create_2nd_comments($operation['author'], $operation['permlink'], $parent_author, $parent_permlink, $comment->comment_content);
+
 					$result["status"] = 200;
 					$result["code"] = "success";
 					$result["message"] = 'Comment created on Steem sueccessfully';
 					$response  = rest_ensure_response( $result );
 					return $response;
+				} else {
+					write_log("createComment Failed");
+					write_log($tx);
+					write_log("----------");
 				}
       }
     }
@@ -181,6 +185,27 @@ class WP_Steem_REST_Comment_Router extends WP_REST_Controller {
 		return $response;
 
 	}
+
+
+	protected function create_2nd_comments ( $author, $permlink, $parentAuthor, $parentPermlink, $body ) {
+		try {
+			$node = get_option("steem_2nd_api_node_url");
+			if (!empty($node)) {
+				$second_steem = new Steem($node);
+				if ($second_steem) {
+					write_log("createComment 2nd: @{$author}/{$permlink}");
+					$tx = $second_steem->_comment($parentAuthor, $parentPermlink, $author, $permlink, "", $body);
+					return $tx;
+				} else {
+					return null;
+				}
+			}
+		} catch (\Exception $e) {
+			write_log("failed to create comment @{$author}/{$permlink} on second Steem");
+			return $e;
+		}
+	}
+
 
 	public function delete_comments( $request ) {
 		$access_token = base64_decode($request['access_token']);

@@ -292,6 +292,50 @@ class Steem
 		return $this->steemPost->getDiscussionsByHot($tag, $limit, $startAuthor, $startPermlink);
 	}
 
+/**
+	 * A generic command of creating a post or a comment, please use it carefully
+	 *
+	 * @param      string  $parentAuthor   	The author of the parent comment
+	 * @param      string  $parentPermlink  The permlink of the parent comment
+	 * @param      string  $author   				The author of the comment
+	 * @param      string  $permlink   			The permlink of the comment
+	 * @param      string  $title   				The title of the comment
+	 * @param      string  $body   					The body of the comment
+	 * @param      string  $tags   					The tags for the comment
+	 * @param      string  $app             The app name for the comment
+	 * @param      string  $jsonMetadata   	The json metadata of the comment
+	 *
+	 * @return     array   The response of the action
+	 */
+	public function _comment($parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $tags = null, $app = null, $jsonMetadata = null)
+	{
+		if (empty($tags) && function_exists('get_option')) {
+			$tagsText = get_option("steem_dapp_default_tags");
+			if (!empty($tagsText)) {
+				$tagsText = strtolower($tagsText);
+				$tags = wp_parse_list($tagsText);
+			}
+		}
+		if (empty($jsonMetadata)) {
+			$jsonMetadata = [
+				"tags" => !empty($tags) ? $tags : ["cn"],
+				"app" => !empty($app) ? $app : "steem4wp/1.0"
+			];
+		}
+		if (empty($permlink)) {
+			$timestamp = \DateTime::createFromFormat('U.u', microtime(true))->format("Ymd\\tHisv\z");
+			$permlink = sanitizePermlink($title);
+			if (empty(preg_replace("/-/", "", $permlink))) {
+				$permlink = $timestamp;
+			} else {
+				$permlink = $permlink . '-' . $timestamp;
+			}
+		}
+		$body = sanitizeBody($body);
+
+		return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+	}
+
 	/**
 	 * Create a post
 	 *
@@ -368,6 +412,8 @@ class Steem
 		$body = sanitizeBody($body);
 		return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, null, "", $body, $jsonMetadata);
 	}
+
+
 
 	/**
 	 * Delete the post

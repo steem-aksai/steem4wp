@@ -190,8 +190,8 @@ class Steem_for_Wordpress_Settings {
 	private function settings_fields() {
 
 		$settings['steem'] = array(
-			'title'       => __( 'Steem 应用设置', 'steem-for-wordpress' ),
-			'description' => __( 'Steem 应用的基本设置，包括 App 主账户、密码等设置', 'steem-for-wordpress' ),
+			'title'       => __( 'Steem DApp 应用设置', 'steem-for-wordpress' ),
+			'description' => __( 'Steem DApp 应用的基本设置，包括 App 主账户、密码等设置', 'steem-for-wordpress' ),
 			'fields'      => array(
 				array(
 					'id'          => 'dapp_account',
@@ -236,9 +236,17 @@ class Steem_for_Wordpress_Settings {
 				array(
 					'id'          => 'api_node_url',
 					'label'       => __( 'Steem API 节点地址', 'steem-for-wordpress' ),
-					'description' => __( 'Steem API 节点的URL，例如 https://anyx.io, https://steemd.minnowsupportproject.org, https://api.steemit.com', 'steem-for-wordpress' ),
+					'description' => __( 'Steem API 节点的URL，例如 https://steem.61bts.com, https://steemd.minnowsupportproject.org', 'steem-for-wordpress' ),
 					'type'        => 'text',
 					'default'     => 'https://steemd.minnowsupportproject.org',
+					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
+				),
+				array(
+					'id'          => '2nd_api_node_url',
+					'label'       => __( 'Steem 分链的 API 节点地址', 'steem-for-wordpress' ),
+					'description' => __( 'Steem 分链的 API 节点的URL，例如 https://anyx.io', 'steem-for-wordpress' ),
+					'type'        => 'text',
+					'default'     => '',
 					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
 				),
 				// array(

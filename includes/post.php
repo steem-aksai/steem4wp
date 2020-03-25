@@ -134,22 +134,27 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller {
 		}
     if ($this->steem) {
 			$tx = $this->steem->createPost($user->user_login, $post->post_title, $post->post_content);
-      // write_log("transaction");
-      // write_log($tx);
-      // write_log("----------");
       if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
         $operation = $tx['operations'][0][1];
         update_post_meta( $post_id, 'steem_author', $operation['author'] );
         update_post_meta( $post_id, 'steem_permlink', $operation['permlink'] );
-        // write_log("createPost");
-        // write_log($operation);
-        // write_log("----------");
+        write_log("createPost Succeeded");
+        write_log($operation);
+				write_log("----------");
+
+				// second steem post
+				$this->create_2nd_post($operation['author'], $operation['permlink'], $post->post_title, $post->post_content);
+
         $result["status"] = 200;
         $result["code"] = "success";
         $result["message"] = 'Post created on Steem sueccessfully';
         $response  = rest_ensure_response( $result );
         return $response;
-      }
+      } else {
+				write_log("createPost Failed");
+				write_log($tx);
+				write_log("----------");
+			}
     }
 
     $result["status"] = 500;
@@ -158,6 +163,25 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller {
 		$response  = rest_ensure_response( $result );
 		return $response;
 
+	}
+
+	protected function create_2nd_post ( $author, $permlink, $title, $body ) {
+		try {
+			$node = get_option("steem_2nd_api_node_url");
+			if (!empty($node)) {
+				$second_steem = new Steem($node);
+				if ($second_steem) {
+					write_log("createPost 2nd: @{$author}/{$permlink}");
+					$tx = $second_steem->createPost($author, $title, $body, null, null, null, $permlink);
+					return $tx;
+				} else {
+					return null;
+				}
+			}
+		} catch (\Exception $e) {
+			write_log("failed to create post @{$author}/{$permlink} on second Steem");
+			return $e;
+		}
 	}
 
 	public function update_posts( $request ) {

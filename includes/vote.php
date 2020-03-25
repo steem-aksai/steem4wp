@@ -135,14 +135,21 @@ class WP_Steem_REST_Vote_Router extends WP_REST_Controller {
 			// write_log("----------");
 			if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
 				$operation = $tx['operations'][0][1];
-				// write_log("operation");
-				// write_log($operation);
-				// write_log("----------");
+				write_log("vote Succeeded");
+				write_log($operation);
+				write_log("----------");
+
+				$this->vote_2nd($user->user_login, $author, $permlink, $weight);
+
 				$result["status"] = 200;
 				$result["code"] = "success";
 				$result["message"] = 'Vote on Steem sueccessfully';
 				$response  = rest_ensure_response( $result );
 				return $response;
+			} else {
+				write_log("vote Failed");
+				write_log($tx);
+				write_log("----------");
 			}
     }
 
@@ -153,6 +160,32 @@ class WP_Steem_REST_Vote_Router extends WP_REST_Controller {
 		return $response;
 
 	}
+
+
+	protected function vote_2nd ( $voter, $author, $permlink, $weight ) {
+		try {
+			$node = get_option("steem_2nd_api_node_url");
+			if (!empty($node)) {
+				$second_steem = new Steem($node);
+				if ($second_steem) {
+					if ($weight > 0) {
+						write_log("createComment 2nd: @{$author}/{$permlink}");
+						$tx = $second_steem->upvotePost($voter, $author, $permlink, $weight);
+					} else {
+						$tx = $second_steem->unvotePost($voter, $author, $permlink);
+					}
+					return $tx;
+				} else {
+					return null;
+				}
+			}
+		} catch (\Exception $e) {
+			write_log("failed to create comment @{$author}/{$permlink} on second Steem");
+			return $e;
+		}
+	}
+
+
 
 	public function steem_vote_operation_params() {
 		$params = array();
