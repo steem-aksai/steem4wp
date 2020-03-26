@@ -169,7 +169,7 @@ class WP_Steem_REST_Vote_Router extends WP_REST_Controller {
 				$second_steem = new Steem($node);
 				if ($second_steem) {
 					if ($weight > 0) {
-						write_log("createComment 2nd: @{$author}/{$permlink}");
+						write_log("vote 2nd: @{$author}/{$permlink}");
 						$tx = $second_steem->upvotePost($voter, $author, $permlink, $weight);
 					} else {
 						$tx = $second_steem->unvotePost($voter, $author, $permlink);
