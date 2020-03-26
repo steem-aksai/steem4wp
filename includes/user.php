@@ -522,6 +522,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			}
 			// add_user_meta( $user_id, 'unionid', $unionId );
 			// add_user_meta( $user_id, 'session_key', $session['session_key'] );
+			add_user_meta( $user_id, 'openId', $openId);
 			add_user_meta( $user_id, 'session_key', $access_token );
 			add_user_meta( $user_id, 'platform', $platform);
 			// $credits = (int)get_credit_option('member');
@@ -563,7 +564,8 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			}
 			// update_user_meta( $user_id, 'unionid', $unionId );
 			// update_user_meta( $user_id, 'session_key', $session['session_key'] );
-			add_user_meta( $user_id, 'session_key', $access_token );
+			update_user_meta( $user_id, 'openId', $openId);
+			update_user_meta( $user_id, 'session_key', $access_token );
 			update_user_meta($user_id, 'platform', $platform);
 		}
 
@@ -655,9 +657,13 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		$platform = "wechat";
 		$openId = $session['openid'];
 		$access_token = $session['session_key'];
-		$users = get_users( "openid={$openId}" );
-		if(!empty($users)) {
-			$current_user = $users[0];
+		$user_query = new WP_User_Query( array( 'meta_key' => 'openId', 'meta_value' => $openId ) );
+		$users = $user_query->get_results();
+		if(!empty($users) && is_array($users)) {
+			write_log("search users by openId {$openId}");
+			write_log(count($users));
+			write_log("------");
+			$current_user = $users[0]; // FIXME: may have multiple accounts
 		}
 
 		// if find steemId locally, return user data
