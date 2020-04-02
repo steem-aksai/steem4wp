@@ -14,7 +14,7 @@ class SteemID {
 
   protected static $steemid_base_url = 'https://steemid.herokuapp.com';
 
-  public static function send($endpoint, $wechat_id, $username = '') {
+  public static function send($endpoint, $wechat_id, $username = '', $profile = '') {
     if (function_exists('get_option')) {
       $dapp_id = get_option('steem_dapp_account');
       $dapp_password = get_option('steem_dapp_steemid_password');
@@ -44,11 +44,14 @@ class SteemID {
         'timestamp'  => (new DateTime())->getTimestamp() * 1000,
         'token'      => $token,
         'wechat_id'  => $wechat_id,
-        'username'   => $username
+        'username'   => $username,
       ),
       'cookies'     => array(),
       'user-agent' => 'WordPress/' . $wp_version . '; ' . get_bloginfo('url')
     );
+    if (!empty($profile)) {
+      $args['body']['json_metadata'] = $profile;
+    }
     $response = wp_remote_post( SteemID::$steemid_base_url . $endpoint, $args );
     if ( is_wp_error( $response ) ) {
       return null;
@@ -80,8 +83,8 @@ class SteemID {
   /**
 	 * Register the Steem account with WeChat ID
 	 */
-	public static function new($wechat_id, $username) {
-    return SteemID::send('/users/wechat/new', $wechat_id, $username);
+	public static function new($wechat_id, $username, $profile) {
+    return SteemID::send('/users/wechat/new', $wechat_id, $username, $profile);
   }
 
 }

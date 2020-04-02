@@ -10,6 +10,56 @@ if ( !defined( 'ABSPATH' ) ) exit;
 
 class Steem_Auth {
 
+  public static function validateWeChatUser($request) {
+
+		date_default_timezone_set(get_option('timezone_string'));
+
+		$appid 			= get_minapp_option('appid');
+		$appsecret 		= get_minapp_option('secretkey');
+		$role 			= get_minapp_option('use_role');
+
+		$params = $request->get_params();
+
+		$args = array(
+			'appid' => $appid,
+			'secret' => $appsecret,
+			'js_code' => $params['code'],
+			'grant_type' => 'authorization_code'
+		);
+
+		$url = 'https://api.weixin.qq.com/sns/jscode2session';
+
+		$urls = add_query_arg($args, $url);
+
+		$remote = wp_remote_get($urls);
+
+		if( !is_array( $remote ) || is_wp_error($remote) || $remote['response']['code'] != '200' ) {
+			return new WP_Error( 'error', '授权 API 错误', array( 'status' => 500, 'message' => $remote ) );
+		}
+
+		$body = stripslashes( $remote['body'] );
+
+		$session = json_decode( $body, true );
+
+		if ( empty($params['encryptedData']) && empty($params['iv']) ) {
+			$response = rest_ensure_response( array( "code" => $params['code'] ) );
+			return $response;
+		}
+
+		$auth = Steem_Auth::decryptWeChatData($appid, $session['session_key'], urldecode($params['encryptedData']), urldecode($params['iv']), $data );
+
+		if( $auth != 0 ) {
+			return new WP_Error( 'error', '授权获取失败', array( 'status' => 400, 'errcode' => $auth ) );
+		}
+
+    $user_data = json_decode( $data, true );
+
+    return [
+      "session" => $session,
+      "user_data" => $user_data
+    ];
+  }
+
   /**
 	 * Generate session key and expiration date
 	 */

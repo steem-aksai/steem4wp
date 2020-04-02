@@ -239,6 +239,9 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 
 		$username = isset($request['username']) ? $request['username'] : "";
 		$openId = isset($request['openId']) ? $request['openId'] : "";
+		$code = isset($request['code'])?$request['code']:"";
+		$encryptedData = isset($request['encryptedData'])?$request['encryptedData']:"";
+		$iv = isset($request['iv'])?$request['iv']:"";
 
 		if( empty($username) ) {
 			return new WP_Error( 'error', '缺少用户名', array( 'status' => 400 ) );
@@ -246,6 +249,18 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 
 		if( empty($openId) ) {
 			return new WP_Error( 'error', '缺少微信openId', array( 'status' => 400 ) );
+		}
+
+		if( empty($encryptedData) ) {
+			return new WP_Error( 'error', '缺少用户信息的加密数据', array( 'status' => 400 ) );
+		}
+
+		if( empty($code) ) {
+			return new WP_Error( 'error', '用户登录 code 参数错误', array( 'status' => 400 ) );
+		}
+
+		if( empty($iv) ) {
+			return new WP_Error( 'error', '缺少加密算法的初始向量', array( 'status' => 400 ) );
 		}
 
 		return true;
@@ -389,6 +404,24 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			'required' => true,
 			'default'	=> '',
 			'description'	=> "微信OpenID",
+			'type'	=>	 "string"
+		);
+		$params['encryptedData'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "微信授权登录，包括敏感数据在内的完整用户信息的加密数据.",
+			'type'	=>	 "string"
+		);
+		$params['code'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "用户登录凭证（有效期五分钟）",
+			'type'	=>	 "string"
+		);
+		$params['iv'] = array(
+			'required' => true,
+			'default'	=> '',
+			'description'	=> "微信授权登录，加密算法的初始向量.",
 			'type'	=>	 "string"
 		);
 		return $params;
@@ -612,48 +645,13 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 	 */
 
 	public function wp_user_login_by_wechat( $request ) {
-
-		date_default_timezone_set(get_option('timezone_string'));
-
-		$appid 			= get_minapp_option('appid');
-		$appsecret 		= get_minapp_option('secretkey');
-		$role 			= get_minapp_option('use_role');
-
-		$params = $request->get_params();
-
-		$args = array(
-			'appid' => $appid,
-			'secret' => $appsecret,
-			'js_code' => $params['code'],
-			'grant_type' => 'authorization_code'
-		);
-
-		$url = 'https://api.weixin.qq.com/sns/jscode2session';
-
-		$urls = add_query_arg($args,$url);
-
-		$remote = wp_remote_get($urls);
-
-		if( !is_array( $remote ) || is_wp_error($remote) || $remote['response']['code'] != '200' ) {
-			return new WP_Error( 'error', '授权 API 错误', array( 'status' => 500, 'message' => $remote ) );
+		$result = Steem_Auth::validateWeChatUser($request);
+		if (is_wp_error($result)) {
+			return $result;
+		} else {
+			$session = $result['session'];
 		}
 
-		$body = stripslashes( $remote['body'] );
-
-		$session = json_decode( $body, true );
-
-		if ( empty($params['encryptedData']) && empty($params['iv']) ) {
-			$response = rest_ensure_response( array( "code" => $params['code'] ) );
-			return $response;
-		}
-
-		$auth = Steem_Auth::decryptWeChatData($appid, $session['session_key'], urldecode($params['encryptedData']), urldecode($params['iv']), $data );
-
-		if( $auth != 0 ) {
-			return new WP_Error( 'error', '授权获取失败', array( 'status' => 400, 'errcode' => $auth ) );
-		}
-
-		$user_data = json_decode( $data, true );
 		$platform = "wechat";
 		$openId = $session['openid'];
 		$access_token = $session['session_key'];
@@ -695,18 +693,34 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 	 */
 
 	public function wp_user_register_steem_account( $request ) {
+		$result = Steem_Auth::validateWeChatUser($request);
+		if (is_wp_error($result)) {
+			return $result;
+		} else {
+			$user_data = $result['user_data'];
+		}
+
+		$profile = [
+			"profile" => [
+				"name" => $user_data['nickName'],
+				"profile_image" => $user_data['avatarUrl']
+			]
+		];
+
 		$params = $request->get_params();
 		$steemId = $params['username'];
 		$openId = $params['openId'];
 
-		$username = SteemID::new($openId, $steemId);
+		$username = SteemID::new($openId, $steemId, json_encode($profile));
 		if ($username) {
+			write_log("register Steem account @{$steemId} succeeded.");
 			$data = [
 				'username' => $username
 			];
 			$response = rest_ensure_response( $data );
 			return $response;
 		} else {
+			write_log("register Steem account @{$steemId} failed.");
 			return new WP_Error( 'error', "注册Steem账户 @{$steemId} 失败", array( 'status' => 500 ) );
 		}
 	}
