@@ -514,7 +514,8 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 
 
 	protected function login_by_steem($steemId, $openId, $access_token, $expired_in) {
-		$expire_date = date('Y-m-d H:i:s', time()+72000); // date('Y-m-d H:i:s', time()+$expired_in);
+		// date('Y-m-d H:i:s', time()+$expired_in);
+		$expired_in = !empty($expired_in) ? $expired_in : 60480;
 		$user_pass = wp_generate_password(16, false);
 		$platform = 'wechat';
 
@@ -547,7 +548,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 				'province'				=> null,
 				'country'				=> null,
 				'language'				=> 'zh_CN',
-				'expire_in'				=> $expire_date
+				'expire_in'				=> $expired_in
       );
 			$user_id = wp_insert_user( $userdata );
 			if ( is_wp_error( $user_id ) ) {
@@ -589,7 +590,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 				'province'				=> null,
 				'country'				=> null,
 				'language'				=> 'zh_CN',
-				'expire_in'				=> $expire_date
+				'expire_in'				=> $expired_in
 			);
 			$user_id = wp_update_user($userdata);
 			if(is_wp_error($user_id)) {
@@ -625,7 +626,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 				"description"	=> $userdata['description']
 			],
 			"access_token" => base64_encode($access_token),
-			"expired_in" => $expire_date
+			"expired_in" => $expired_in
 		];
 
 		// if( class_exists('MP_Message') ) {
