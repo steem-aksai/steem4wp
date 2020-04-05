@@ -699,6 +699,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			return $result;
 		} else {
 			$user_data = $result['user_data'];
+			$session = $result['session'];
 		}
 
 		$profile = [
@@ -711,12 +712,15 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 		$params = $request->get_params();
 		$steemId = $params['username'];
 		$openId = $params['openId'];
+		$access_token = $session['session_key'];
 
 		$username = SteemID::new($openId, $steemId, json_encode($profile));
 		if ($username) {
 			write_log("register Steem account @{$steemId} succeeded.");
 			$data = [
-				'username' => $username
+				'username' => $username,
+				'token' => $access_token,
+				'expired_in' => 60480
 			];
 			$response = rest_ensure_response( $data );
 			return $response;
