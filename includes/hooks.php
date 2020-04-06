@@ -26,7 +26,15 @@ function update_steem_user_settings( $user_id ) {
 add_action( 'show_user_profile', 'get_steem_user_settings' );
 add_action( 'edit_user_profile', 'get_steem_user_settings' );
 
-function get_default_footer() {
+function get_username($user) {
+	$username = get_the_author_meta( 'user_steem_id', $user->ID );
+	if (empty($username) && !empty($user->steemId)) {
+		$username = $user->steemId;
+	}
+	return $username;
+}
+
+function get_default_footer($user) {
 	$default_footer = get_the_author_meta( 'user_steem_footer', $user->ID );
 	if (empty($default_footer)) {
 		$default_footer = "<br /><center><hr/><em>本文使用 <a href='https://github.com/steem-aksai/steem4wp'>Steem4WP</a> 发布；原文来自 : [%original_link%] </em><hr/></center>";
@@ -40,7 +48,7 @@ function get_steem_user_settings( $user ) { ?>
     <tr>
         <th><label for="user_steem_id">Steem ID</label></th>
         <td>
-            <input type="text" name="user_steem_id" id="user_steem_id" class="regular-text" value="<?php echo htmlspecialchars(get_the_author_meta( 'user_steem_id', $user->ID ), ENT_QUOTES); ?>"/>
+            <input type="text" name="user_steem_id" id="user_steem_id" class="regular-text" value="<?php echo htmlspecialchars(get_username($user), ENT_QUOTES); ?>"/>
         </td>
     </tr>
     <tr>
@@ -58,7 +66,7 @@ function get_steem_user_settings( $user ) { ?>
     <tr>
         <th><label for="user_steem_footer">文章脚注</label></th>
         <td>
-          <textarea name="user_steem_footer" id="user_steem_footer" rows="5" columns="30"> <?php echo htmlspecialchars(get_default_footer(), ENT_QUOTES); ?> </textarea>
+          <textarea name="user_steem_footer" id="user_steem_footer" rows="5" columns="30"> <?php echo htmlspecialchars(get_default_footer($user), ENT_QUOTES); ?> </textarea>
         </td>
     </tr>
 </table>
