@@ -54,6 +54,13 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller {
 	protected $steem;
 
 	/**
+	 * @var $steem_pos
+	 *
+	 * $steem_pos will be the WP_Steem_Ops object that interact with Steem blockchain
+	 */
+	protected $steem_ops;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 4.7.0
@@ -129,58 +136,22 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller {
 		$post_id = $request['post_id'];
 		$post = get_post( $post_id );
 
-    if (!$this->steem) {
-      $this->steem = new Steem();
+		if (!$this->steem_ops) {
+			$this->steem_ops = new WP_Steem_Ops();
 		}
-    if ($this->steem) {
-			$tx = $this->steem->createPost($user->user_login, $post->post_title, $post->post_content);
-      if (!empty($tx) && array_key_exists('operations', $tx) && !array_key_exists('trace', $tx)) {
-        $operation = $tx['operations'][0][1];
-        update_post_meta( $post_id, 'steem_author', $operation['author'] );
-        update_post_meta( $post_id, 'steem_permlink', $operation['permlink'] );
-        write_log("createPost Succeeded");
-        write_log($operation);
-				write_log("----------");
-
-				// second steem post
-				$this->create_2nd_post($operation['author'], $operation['permlink'], $post->post_title, $post->post_content);
-
-        $result["status"] = 200;
-        $result["code"] = "success";
-        $result["message"] = 'Post created on Steem sueccessfully';
-        $response  = rest_ensure_response( $result );
-        return $response;
-      } else {
-				write_log("createPost Failed");
-				write_log($tx);
-				write_log("----------");
-			}
-    }
-
-    $result["status"] = 500;
-    $result["code"] = "success";
-    $result["message"] = "Failed to create post on Steem";
-		$response  = rest_ensure_response( $result );
-		return $response;
-
-	}
-
-	protected function create_2nd_post ( $author, $permlink, $title, $body ) {
-		try {
-			$node = get_option("steem_2nd_api_node_url");
-			if (!empty($node)) {
-				$second_steem = new Steem($node);
-				if ($second_steem) {
-					write_log("createPost 2nd: @{$author}/{$permlink}");
-					$tx = $second_steem->createPost($author, $title, $body, null, null, null, $permlink);
-					return $tx;
-				} else {
-					return null;
-				}
-			}
-		} catch (\Exception $e) {
-			write_log("failed to create post @{$author}/{$permlink} on second Steem");
-			return $e;
+		$res = $this->steem_ops->create_post($user->user_login, $post_id);
+		if ($res) {
+			$result["status"] = 200;
+			$result["code"] = "success";
+			$result["message"] = 'Post created on Steem sueccessfully';
+			$response  = rest_ensure_response( $result );
+			return $response;
+		} else {
+			$result["status"] = 500;
+			$result["code"] = "success";
+			$result["message"] = "Failed to create post on Steem";
+			$response  = rest_ensure_response( $result );
+			return $response;
 		}
 	}
 

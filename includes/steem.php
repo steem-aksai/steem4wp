@@ -84,8 +84,8 @@ class Steem
 	 */
 	protected function getWif($account)
 	{
-		$wif = "";
-		if (function_exists('get_option')) {
+		$wif = get_user_meta( get_current_user_id(), 'user_steem_posting_key', true );
+		if (empty($wif) && function_exists('get_option')) {
 			$wif = get_option("steem_dapp_wif");
 		}
 		if (empty($wif)) {
@@ -310,11 +310,11 @@ class Steem
 	public function _comment($parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $tags = null, $app = null, $jsonMetadata = null)
 	{
 		if (empty($tags) && function_exists('get_option')) {
-			$tagsText = get_option("steem_dapp_default_tags");
-			if (!empty($tagsText)) {
-				$tagsText = strtolower($tagsText);
-				$tags = wp_parse_list($tagsText);
-			}
+			$tags = get_option("steem_dapp_default_tags");
+		}
+		if (!empty($tags) && is_string($tags)) {
+			$tags = strtolower($tags);
+			$tags = wp_parse_list($tags);
 		}
 		if (empty($jsonMetadata)) {
 			$jsonMetadata = [
@@ -352,11 +352,11 @@ class Steem
 	public function createPost($author, $title, $body, $tags = null, $app = null, $jsonMetadata = null, $permlink = null)
 	{
 		if (empty($tags) && function_exists('get_option')) {
-			$tagsText = get_option("steem_dapp_default_tags");
-			if (!empty($tagsText)) {
-				$tagsText = strtolower($tagsText);
-				$tags = wp_parse_list($tagsText);
-			}
+			$tags = get_option("steem_dapp_default_tags");
+		}
+		if (!empty($tags) && is_string($tags)) {
+			$tags = strtolower($tags);
+			$tags = wp_parse_list($tags);
 		}
 		if (empty($jsonMetadata)) {
 			$jsonMetadata = [
@@ -520,6 +520,7 @@ function sanitizeBody($body) {
 	$body = preg_replace("/<span[^>]*>/", "", $body);
 	$body = preg_replace("/<\/span>/", "", $body);
 	$body = preg_replace("/\t/", "    ", $body);
+	$body = preg_replace("/<!--(.|s)*?-->/", "", $body);
 	$body = trim($body);
 	return $body;
 }
