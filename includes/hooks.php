@@ -10,6 +10,7 @@ add_filter( 'user_contactmethods',function($userInfo) {
 	return $userInfo;
 });
 
+// add Steem options for publishing post in user profile page
 add_action( 'personal_options_update', 'update_steem_user_settings' );
 add_action( 'edit_user_profile_update', 'update_steem_user_settings' );
 
@@ -64,3 +65,41 @@ function get_steem_user_settings( $user ) { ?>
 <?php }
 
 ?>
+
+<?php
+// show Steem options in publish post page
+function add_steem_custom_box() {
+		$post_id = get_the_ID();
+		if (get_post_type($post_id) != 'post') {
+				return;
+		}
+		add_meta_box(
+			'steem_custom_box_id',
+			'Steem',
+			'display_steem_custom_box',
+			'post',
+			'side'
+		);
+}
+add_action('add_meta_boxes', 'add_steem_custom_box');
+
+function display_steem_custom_box($post){
+		$author_id = $post->post_author;
+		$post_id = get_the_ID();
+
+		// Before Publish
+		if (get_post_status($post_id) != 'publish') {
+				$value = get_post_meta($post_id, 'user_steem_publish_post', true);
+				if ($value == "0") {
+						$checked = "";
+				} else {
+						$checked = "checked";
+				}
+				wp_nonce_field('steem_custom_nonce_'.$post_id, 'steem_custom_nonce');
+				$body  = '<label><input type="checkbox" value="1" '.$checked.' name="user_steem_publish_post" /> <input type="hidden" name="user_steem_not_publish_post" value="0" />发布到Steem</label>';
+				echo $body;
+		}
+}
+
+?>
+
