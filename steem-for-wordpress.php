@@ -30,6 +30,7 @@ require_once 'includes/lib/class-steem-for-wordpress-admin-api.php';
 require_once 'includes/lib/class-steem-for-wordpress-post-type.php';
 require_once 'includes/lib/class-steem-for-wordpress-taxonomy.php';
 require_once 'includes/steem.php';
+require_once 'includes/steem4wp.php';
 
 /**
  * Returns the main instance of Steem_for_Wordpress to prevent the need to use globals.
