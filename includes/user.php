@@ -719,7 +719,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller {
 			write_log("register Steem account @{$steemId} succeeded.");
 			$data = [
 				'username' => $username,
-				'token' => $access_token,
+				'token' => base64_encode($access_token),
 				'expired_in' => 60480
 			];
 			$response = rest_ensure_response( $data );
