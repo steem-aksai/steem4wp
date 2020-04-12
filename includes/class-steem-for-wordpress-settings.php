@@ -252,7 +252,7 @@ class Steem_for_Wordpress_Settings {
 				array(
 					'id'          => 'dapp_tags_mapping',
 					'label'       => __( 'Steem DApp 标签的中英文对应关系', 'steem-for-wordpress' ),
-					'description' => __( '每行分别包含标签的英文和中文形式。英文标签将同步到Steem，中文标签在小程序上显示', 'steem-for-wordpress' ),
+					'description' => __( '每行包含标签的英文和中文形式。英文标签将同步到Steem，中文标签在小程序上显示，用逗号、空格或制表符（tab）分开', 'steem-for-wordpress' ),
 					'type'        => 'textarea',
 					'default'     => '',
 					'placeholder' => __("life	生活\nphotography	摄影", 'steem-for-wordpress' ),
