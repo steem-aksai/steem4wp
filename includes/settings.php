@@ -128,14 +128,15 @@ class WP_Steem_REST_Settings_Router extends WP_REST_Controller {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function app_tags_mapping($request) {
-		$mapping_str = get_option("steem_dapp_tags_mapping");
-		$mapping_arr = explode("\n", $mapping_str);
-
 		$tags = [];
-		foreach ($mapping_arr as $kv) {
-			if (strlen($kv) != 0) {
-				$temp = explode("\t", $kv);
-				$tags[trim($temp[0])] = trim($temp[1]);
+		$mapping_str = get_option("steem_dapp_tags_mapping");
+		if (!empty($mapping_str)) {
+			$mapping_arr = explode("\n", $mapping_str);
+			foreach ($mapping_arr as $kv) {
+				if (!empty($kv)) {
+					$pair = preg_split("/[\s,]+/", $kv);
+					$tags[trim($pair[0])] = trim($pair[1]);
+				}
 			}
 		}
 		$response = rest_ensure_response($tags);
