@@ -185,7 +185,11 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
       'post_status'  => $post_status,
     );
 
-    if ($update) {
+    if (!$this->steem_ops) {
+      $this->steem_ops = new WP_Steem_Ops();
+    }
+    $res = $this->steem_ops->create_post($user->user_login, $post_id);
+    if ($res) {
       $result["code"] = "success";
       $result["message"] = "Update succeeded";
       $result["status"] = 200;
