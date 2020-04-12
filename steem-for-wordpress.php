@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Plugin Name: Steem for Wordpress
  * Version: 1.0.0
@@ -17,8 +18,8 @@
  * @since 1.0.0
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+if (!defined('ABSPATH')) {
+  exit;
 }
 
 // Load plugin class files.
@@ -38,14 +39,15 @@ require_once 'includes/steem4wp.php';
  * @since  1.0.0
  * @return object Steem_for_Wordpress
  */
-function steem_for_wordpress() {
-	$instance = Steem_for_Wordpress::instance( __FILE__, '1.0.0' );
+function steem_for_wordpress()
+{
+  $instance = Steem_for_Wordpress::instance(__FILE__, '1.0.0');
 
-	if ( is_null( $instance->settings ) ) {
-		$instance->settings = Steem_for_Wordpress_Settings::instance( $instance );
-	}
+  if (is_null($instance->settings)) {
+    $instance->settings = Steem_for_Wordpress_Settings::instance($instance);
+  }
 
-	return $instance;
+  return $instance;
 }
 
 steem_for_wordpress();
@@ -53,7 +55,8 @@ steem_for_wordpress();
 define('STEEM_REST_API_DIR', plugin_dir_path(__FILE__));
 
 // after all plugins are loaded
-add_action( 'plugins_loaded', 'steem4wp_plugins_loaded' );
-function steem4wp_plugins_loaded() {
-	include( STEEM_REST_API_DIR.'includes/router.php' );
+add_action('plugins_loaded', 'steem4wp_plugins_loaded');
+function steem4wp_plugins_loaded()
+{
+  include(STEEM_REST_API_DIR . 'includes/router.php');
 }
