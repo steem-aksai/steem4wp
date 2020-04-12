@@ -255,7 +255,7 @@ class Steem_for_Wordpress_Settings {
 					'description' => __( '每行包含标签的英文和中文形式。英文标签将同步到Steem，中文标签在小程序上显示，用逗号、空格或制表符（tab）分开', 'steem-for-wordpress' ),
 					'type'        => 'textarea',
 					'default'     => '',
-					'placeholder' => __("life	生活\nphotography	摄影\n\nOr\nlife,生活\nphotography,摄影\n\nOr\nlife，生活\nphotography，摄影\n\nOr\nlife 生活\nphotography 摄影", 'steem-for-wordpress' ),
+					'placeholder' => __("life	生活\nphotography	摄影\nart	艺术\nintroduceyourself	自我介绍\ncryptocurrency	加密货币", 'steem-for-wordpress' ),
 				),
 				// array(
 				// 	'id'          => 'secret_text_field',
