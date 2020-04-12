@@ -249,6 +249,14 @@ class Steem_for_Wordpress_Settings {
 					'default'     => '',
 					'placeholder' => __( 'posting key', 'steem-for-wordpress' ),
 				),
+				array(
+					'id'          => 'dapp_tags_mapping',
+					'label'       => __( '常用标签中英文映射', 'steem-for-wordpress' ),
+					'description' => __( '常用标签的中英文映射JSON，Map结构', 'steem-for-wordpress' ),
+					'type'        => 'textarea',
+					'default'     => '',
+					'placeholder' => __('life	生活\nphotography	摄影', 'steem-for-wordpress' ),
+				),
 				// array(
 				// 	'id'          => 'secret_text_field',
 				// 	'label'       => __( 'Some Secret Text', 'steem-for-wordpress' ),

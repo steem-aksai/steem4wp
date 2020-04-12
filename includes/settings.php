@@ -65,6 +65,14 @@ class WP_Steem_REST_Settings_Router extends WP_REST_Controller {
 			)
 		));
 
+		register_rest_route($this->namespace, '/' . $this->rest_base . '/tags', array(
+			array(
+				'methods'             	=> WP_REST_Server::READABLE,
+				'callback'            	=> array($this, 'app_tags_mapping'),
+				'permission_callback' 	=> array($this, 'wp_settings_permissions_check'),
+				'args'                	=> $this->wp_settings_collection_params(),
+			)
+		));
 	}
 
 	/**
@@ -111,5 +119,27 @@ class WP_Steem_REST_Settings_Router extends WP_REST_Controller {
 		return $response;
 	}
 
+	/**
+	 * Get the common tags mapping.
+	 * @since 4.7.0
+	 * @access public
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function app_tags_mapping($request) {
+		$mapping_str = get_option("steem_dapp_tags_mapping");
+		$mapping_arr = explode("\n", $mapping_str);
+
+		$tags = [];
+		foreach ($mapping_arr as $kv) {
+			if (strlen($kv) != 0) {
+				$temp = explode("\t", $kv);
+				$tags[trim($temp[0])] = trim($temp[1]);
+			}
+		}
+		$response = rest_ensure_response($tags);
+		return $response;
+	}
 }
 
