@@ -134,7 +134,7 @@ class WP_Steem_REST_Settings_Router extends WP_REST_Controller {
 			$mapping_arr = explode("\n", $mapping_str);
 			foreach ($mapping_arr as $kv) {
 				if (!empty($kv)) {
-					$pair = preg_split("/[\s,]+/", $kv);
+					$pair = preg_split("/[\s,，]+/", $kv);
 					$tags[trim($pair[0])] = trim($pair[1]);
 				}
 			}
