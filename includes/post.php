@@ -137,13 +137,17 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user_id = $users->ID;
     $user = get_user_by('ID', $user_id);
 
+    // get tags from the request body.
+    $bodyData = @file_get_contents('php://input');
+    $tags = json_decode($bodyData)->tags;
+
     $post_id = $request['post_id'];
     $post = get_post($post_id);
 
     if (!$this->steem_ops) {
       $this->steem_ops = new WP_Steem_Ops();
     }
-    $res = $this->steem_ops->create_post($user->user_login, $post_id);
+    $res = $this->steem_ops->create_post($user->user_login, $post_id, $tags);
     if ($res) {
       $result["status"] = 200;
       $result["code"] = "success";
@@ -171,6 +175,11 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user = get_user_by('ID', $user_id);
 
     $post_id = $request['post_id'];
+    
+    // get tags from the request body.
+    $bodyData = @file_get_contents('php://input');
+    $tags = json_decode($bodyData)->tags;
+
     $post = get_post($post_id);
     $author_id = (int) $post->post_author;
     $post_status = isset($request['post_status']) ? $request['post_status'] : $post->post_status;
@@ -188,7 +197,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     if (!$this->steem_ops) {
       $this->steem_ops = new WP_Steem_Ops();
     }
-    $res = $this->steem_ops->create_post($user->user_login, $post_id);
+    $res = $this->steem_ops->create_post($user->user_login, $post_id, $tags);
     if ($res) {
       $result["code"] = "success";
       $result["message"] = "Update succeeded";
