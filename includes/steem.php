@@ -351,13 +351,8 @@ class Steem
    */
   public function createPost($author, $title, $body, $tags = null, $app = null, $jsonMetadata = null, $permlink = null)
   {
-    if (empty($tags) && function_exists('get_option')) {
-      $tags = get_option("steem_dapp_default_tags");
-    }
-    if (!empty($tags) && is_string($tags)) {
-      $tags = strtolower($tags);
-      $tags = wp_parse_list($tags);
-    }
+    $tags = $this->collectTags($tags);
+
     if (empty($jsonMetadata)) {
       $jsonMetadata = [
         "tags" => !empty($tags) ? $tags : ["cn"],
@@ -379,6 +374,44 @@ class Steem
     $parentAuthor = "";
 
     return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+  }
+
+  /**
+   * collect tags by customized tags of user and default tags of admin.
+   *
+   * @param      string  $customized_tags The tags of customized.
+   * @return     array   tags.
+   */
+  public function collectTags($customized_tags)
+  {
+    $default_tags = array();
+    $tags = array();
+
+    // get default tags.
+    if (function_exists('get_option')) {
+      $default_tags = get_option("steem_dapp_default_tags");
+    }
+
+    // convert default tags to array.
+    if (!empty($default_tags) && is_string($default_tags)) {
+      $default_tags = strtolower($default_tags);
+      $default_tags = wp_parse_list($default_tags);
+    }
+
+    if (!empty($customized_tags) && is_string($customized_tags)) {
+      $customized_tags = strtolower($customized_tags);
+      $customized_tags = wp_parse_list($customized_tags);
+    }
+
+    // merge all the tags and remove duplicates.
+    if (!empty($customized_tags) && !empty($default_tags)) {
+      $tags = array_keys(array_flip($customized_tags) + array_flip($default_tags));
+    } else if (empty($customized_tags)) {
+      $tags = $default_tags;
+    } else if (empty($default_tags)) {
+      $tags = $customized_tags;
+    }
+    return $tags;
   }
 
   /**
