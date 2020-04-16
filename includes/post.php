@@ -150,7 +150,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
       return rest_ensure_response($result);
     } else {
       $result["status"] = 500;
-      $result["code"] = "success";
+      $result["code"] = "error";
       $result["message"] = "Failed to create post on Steem";
       return rest_ensure_response($result);
     }
