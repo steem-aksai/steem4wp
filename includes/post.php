@@ -136,12 +136,8 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user_id = $users->ID;
     $user = get_user_by('ID', $user_id);
 
-    // get tags from the request body.
-    $body_data = @file_get_contents('php://input');
-    $tags = json_decode($body_data)->tags;
-
     $post_id = $request['post_id'];
-    $post = get_post($post_id);
+    $tags = $args['tags'];
 
     if (!$this->steem_ops) {
       $this->steem_ops = new WP_Steem_Ops();
@@ -162,7 +158,6 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
 
   public function update_posts($request)
   {
-
     $access_token = base64_decode($request['access_token']);
     $users = Steem_Auth::login($access_token);
     if (!$users) {
@@ -172,9 +167,9 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user = get_user_by('ID', $user_id);
 
     $post_id = $request['post_id'];
-    
-    $body_data = @file_get_contents('php://input');
-    $tags = json_decode($body_data)->tags;
+
+    $args = $request->get_params();
+    $tags = $args['tags'];
 
     $post = get_post($post_id);
     $author_id = (int) $post->post_author;
