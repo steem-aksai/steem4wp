@@ -127,7 +127,6 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
 
   public function create_posts($request)
   {
-
     $args = $request->get_params();
     $access_token = base64_decode($args['access_token']);
     $users = Steem_Auth::login($access_token);
@@ -138,8 +137,8 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user = get_user_by('ID', $user_id);
 
     // get tags from the request body.
-    $bodyData = @file_get_contents('php://input');
-    $tags = json_decode($bodyData)->tags;
+    $body_data = @file_get_contents('php://input');
+    $tags = json_decode($body_data)->tags;
 
     $post_id = $request['post_id'];
     $post = get_post($post_id);
@@ -152,14 +151,12 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
       $result["status"] = 200;
       $result["code"] = "success";
       $result["message"] = 'Post created on Steem sueccessfully';
-      $response  = rest_ensure_response($result);
-      return $response;
+      return rest_ensure_response($result);
     } else {
       $result["status"] = 500;
       $result["code"] = "success";
       $result["message"] = "Failed to create post on Steem";
-      $response  = rest_ensure_response($result);
-      return $response;
+      return rest_ensure_response($result);
     }
   }
 
@@ -176,9 +173,8 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
 
     $post_id = $request['post_id'];
     
-    // get tags from the request body.
-    $bodyData = @file_get_contents('php://input');
-    $tags = json_decode($bodyData)->tags;
+    $body_data = @file_get_contents('php://input');
+    $tags = json_decode($body_data)->tags;
 
     $post = get_post($post_id);
     $author_id = (int) $post->post_author;
