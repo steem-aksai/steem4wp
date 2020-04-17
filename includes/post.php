@@ -138,6 +138,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
 
     $post_id = $request['post_id'];
     $tags = $args['tags'];
+    $tags = $this->collectTags($tags);
 
     if (!$this->steem_ops) {
       $this->steem_ops = new WP_Steem_Ops();
@@ -170,6 +171,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
 
     $args = $request->get_params();
     $tags = $args['tags'];
+    $tags = $this->collectTags($tags);
 
     $post = get_post($post_id);
     $author_id = (int) $post->post_author;
@@ -199,8 +201,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
       $result["status"] = 500;
     }
 
-    $response  = rest_ensure_response($result);
-    return $response;
+    return rest_ensure_response($result);
   }
 
   public function delete_posts($request)
@@ -249,6 +250,44 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $result["message"] = "Deletion falied";
     $response  = rest_ensure_response($result);
     return $response;
+  }
+
+  /**
+   * collect tags by customized tags of user and default tags of admin.
+   *
+   * @param      string  $customized_tags The tags of customized.
+   * @return     array   tags.
+   */
+  public function collectTags($customized_tags)
+  {
+    $default_tags = array();
+    $tags = array();
+
+    // get default tags.
+    if (function_exists('get_option')) {
+      $default_tags = get_option("steem_dapp_default_tags");
+    }
+
+    // convert default tags to array.
+    if (!empty($default_tags) && is_string($default_tags)) {
+      $default_tags = strtolower($default_tags);
+      $default_tags = wp_parse_list($default_tags);
+    }
+
+    if (!empty($customized_tags) && is_string($customized_tags)) {
+      $customized_tags = strtolower($customized_tags);
+      $customized_tags = wp_parse_list($customized_tags);
+    }
+
+    // merge all the tags and remove duplicates.
+    if (!empty($customized_tags) && !empty($default_tags)) {
+      $tags = array_keys(array_flip($customized_tags) + array_flip($default_tags));
+    } else if (empty($customized_tags)) {
+      $tags = $default_tags;
+    } else if (empty($default_tags)) {
+      $tags = $customized_tags;
+    }
+    return $tags;
   }
 
   public function steem_post_operation_params()
