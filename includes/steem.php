@@ -351,6 +351,13 @@ class Steem
    */
   public function createPost($author, $title, $body, $tags = null, $app = null, $jsonMetadata = null, $permlink = null)
   {
+    if (empty($tags) && function_exists('get_option')) {
+      $tags = get_option("steem_dapp_default_tags");
+    }
+    if (!empty($tags) && is_string($tags)) {
+      $tags = strtolower($tags);
+      $tags = wp_parse_list($tags);
+    }
     if (empty($jsonMetadata)) {
       $jsonMetadata = [
         "tags" => !empty($tags) ? $tags : ["cn"],
