@@ -413,8 +413,6 @@ class Steem
     return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, null, "", $body, $jsonMetadata);
   }
 
-
-
   /**
    * Delete the post
    *

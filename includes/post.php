@@ -127,7 +127,6 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
 
   public function create_posts($request)
   {
-
     $args = $request->get_params();
     $access_token = base64_decode($args['access_token']);
     $users = Steem_Auth::login($access_token);
@@ -138,30 +137,28 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user = get_user_by('ID', $user_id);
 
     $post_id = $request['post_id'];
-    $post = get_post($post_id);
+    $tags = $args['tags'];
+    $tags = $this->collectTags($tags);
 
     if (!$this->steem_ops) {
       $this->steem_ops = new WP_Steem_Ops();
     }
-    $res = $this->steem_ops->create_post($user->user_login, $post_id);
+    $res = $this->steem_ops->create_post($user->user_login, $post_id, $tags);
     if ($res) {
       $result["status"] = 200;
       $result["code"] = "success";
       $result["message"] = 'Post created on Steem sueccessfully';
-      $response  = rest_ensure_response($result);
-      return $response;
+      return rest_ensure_response($result);
     } else {
       $result["status"] = 500;
-      $result["code"] = "success";
+      $result["code"] = "error";
       $result["message"] = "Failed to create post on Steem";
-      $response  = rest_ensure_response($result);
-      return $response;
+      return rest_ensure_response($result);
     }
   }
 
   public function update_posts($request)
   {
-
     $access_token = base64_decode($request['access_token']);
     $users = Steem_Auth::login($access_token);
     if (!$users) {
@@ -171,6 +168,11 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $user = get_user_by('ID', $user_id);
 
     $post_id = $request['post_id'];
+
+    $args = $request->get_params();
+    $tags = $args['tags'];
+    $tags = $this->collectTags($tags);
+
     $post = get_post($post_id);
     $author_id = (int) $post->post_author;
     $post_status = isset($request['post_status']) ? $request['post_status'] : $post->post_status;
@@ -188,7 +190,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     if (!$this->steem_ops) {
       $this->steem_ops = new WP_Steem_Ops();
     }
-    $res = $this->steem_ops->create_post($user->user_login, $post_id);
+    $res = $this->steem_ops->create_post($user->user_login, $post_id, $tags);
     if ($res) {
       $result["code"] = "success";
       $result["message"] = "Update succeeded";
@@ -199,8 +201,7 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
       $result["status"] = 500;
     }
 
-    $response  = rest_ensure_response($result);
-    return $response;
+    return rest_ensure_response($result);
   }
 
   public function delete_posts($request)
@@ -249,6 +250,44 @@ class WP_Steem_REST_Post_Router extends WP_REST_Controller
     $result["message"] = "Deletion falied";
     $response  = rest_ensure_response($result);
     return $response;
+  }
+
+  /**
+   * collect tags by customized tags of user and default tags of admin.
+   *
+   * @param      string  $customized_tags The tags of customized.
+   * @return     array   tags.
+   */
+  public function collectTags($customized_tags)
+  {
+    $default_tags = array();
+    $tags = array();
+
+    // get default tags.
+    if (function_exists('get_option')) {
+      $default_tags = get_option("steem_dapp_default_tags");
+    }
+
+    // convert default tags to array.
+    if (!empty($default_tags) && is_string($default_tags)) {
+      $default_tags = strtolower($default_tags);
+      $default_tags = wp_parse_list($default_tags);
+    }
+
+    if (!empty($customized_tags) && is_string($customized_tags)) {
+      $customized_tags = strtolower($customized_tags);
+      $customized_tags = wp_parse_list($customized_tags);
+    }
+
+    // merge all the tags and remove duplicates.
+    if (!empty($customized_tags) && !empty($default_tags)) {
+      $tags = array_keys(array_flip($customized_tags) + array_flip($default_tags));
+    } else if (empty($customized_tags)) {
+      $tags = $default_tags;
+    } else if (empty($default_tags)) {
+      $tags = $customized_tags;
+    }
+    return $tags;
   }
 
   public function steem_post_operation_params()
