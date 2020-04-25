@@ -146,7 +146,7 @@ function steem_publish_post($new_status, $old_status, $post)
         if (!empty($footer)) {
           $footer = str_replace("[%original_link%]", get_permalink($post->ID), $footer);
         }
-        write_log("steem4wp: public post by @{$username}");
+        write_log("steem4wp: publish post by @{$username}");
         write_log($tags);
         write_log("------");
         $steem_ops = new WP_Steem_Ops();

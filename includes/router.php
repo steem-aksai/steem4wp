@@ -3,6 +3,7 @@
 if (!defined('ABSPATH')) exit;
 
 include(STEEM_REST_API_DIR . 'includes/steemid.php');
+include(STEEM_REST_API_DIR . 'includes/steem4everyone.php');
 include(STEEM_REST_API_DIR . 'includes/auth.php');
 include(STEEM_REST_API_DIR . 'includes/post.php');
 include(STEEM_REST_API_DIR . 'includes/comment.php');

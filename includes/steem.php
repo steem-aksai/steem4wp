@@ -40,7 +40,7 @@ class Steem
    */
   protected $node;
 
-    /**
+  /**
    * @var $steemAccount
    *
    * The SteemAccount instance
@@ -48,17 +48,25 @@ class Steem
   protected $steemAccount;
 
 
-    /**
+  /**
    * @var $node
    *
    * The SteemPost instance
    */
   protected $steemPost;
 
+
+  /**
+   * @var $hasCryptoLib
+   *
+   * The crypto PHP lib has installed locally or not
+   */
+  protected $hasCrytoLib;
+
   /**
    * Initialize the connection to the host
    *
-   * @param      string  $host   The node you want to connect
+   * @param      string  $node   The node you want to connect
    */
   public function __construct($node = null)
   {
@@ -68,13 +76,20 @@ class Steem
       }
     }
     if (empty($node)) {
-      $node = "https://anyx.io";
+      $node = "https://api.steemit.com";
     }
 
     $this->node = trim($node);
     $this->steemAccount = new SteemAccount($this->node);
     $this->steemPost = new SteemPost($this->node);
     $this->steemChain = new SteemChain($this->node);
+    $this->steem4everyone = new Steem4Everyone($this->node);
+
+    if (function_exists('gmp_init')) {
+      $this->hasCrytoLib = true;
+    } else {
+      $this->hasCrytoLib = false;
+    }
   }
 
   /**
@@ -94,6 +109,10 @@ class Steem
     return $wif;
   }
 
+  protected function canBroadcastLocally()
+  {
+    return $this->hasCrytoLib;
+  }
 
   /**
    * Get the account profile information
@@ -378,7 +397,11 @@ class Steem
     $parentPermlink = sanitizePermlink($category);
     $parentAuthor = "";
 
-    return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+    if ($this->canBroadcastLocally()) {
+      return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+    } else {
+      return $this->steem4everyone->comment($parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+    }
   }
 
   /**
