@@ -10,7 +10,8 @@ include(STEEM_REST_API_DIR . 'includes/comment.php');
 include(STEEM_REST_API_DIR . 'includes/vote.php');
 include(STEEM_REST_API_DIR . 'includes/user.php');
 include(STEEM_REST_API_DIR . 'includes/settings.php');
-include(STEEM_REST_API_DIR . 'includes/hooks.php');
+include(STEEM_REST_API_DIR . 'includes/user_hooks.php');
+include(STEEM_REST_API_DIR . 'includes/post_hooks.php');
 
 add_action('rest_api_init', function () {
   $controls = array();
