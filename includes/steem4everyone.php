@@ -34,7 +34,7 @@ class Steem4Everyone
   {
     if (function_exists('get_option')) {
       // $dapp_id = get_option('steem_dapp_account');
-      $dapp_password = get_option('steem_dapp_steemid_password');
+      $dapp_password = get_option('steem_steem4everyone_password');
       $body['dapp_password'] = $dapp_password;
       // $dapp_secret = get_option('steem_dapp_steemid_secret');
     }
