@@ -262,8 +262,8 @@ class Steem_for_Wordpress_Settings
           'label'       => __('Steem API 节点地址', 'steem-for-wordpress'),
           'description' => __('Steem API 节点的URL，例如 https://steem.61bts.com, https://steemd.minnowsupportproject.org', 'steem-for-wordpress'),
           'type'        => 'text',
-          'default'     => 'https://steemd.minnowsupportproject.org',
-          'placeholder' => __('posting key', 'steem-for-wordpress'),
+          'default'     => 'https://api.steemit.com',
+          'placeholder' => __('api node url', 'steem-for-wordpress'),
         ),
         array(
           'id'          => '2nd_api_node_url',
@@ -271,7 +271,7 @@ class Steem_for_Wordpress_Settings
           'description' => __('Steem 分链的 API 节点的URL，例如 https://anyx.io', 'steem-for-wordpress'),
           'type'        => 'text',
           'default'     => '',
-          'placeholder' => __('posting key', 'steem-for-wordpress'),
+          'placeholder' => __('2nd api node url', 'steem-for-wordpress'),
         ),
         array(
           'id'          => 'steem4everyone_password',

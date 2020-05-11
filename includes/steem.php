@@ -99,7 +99,24 @@ class Steem
    */
   protected function getWif($account)
   {
-    $wif = get_user_meta( get_current_user_id(), 'user_steem_posting_key', true );
+    $wif = null;
+    $user_id = null;
+    if (function_exists('get_current_user_id')) {
+      $user_id = get_current_user_id();
+    }
+    if (empty($user_id) && !empty($account)) {
+      $user_query = new WP_User_Query(array('meta_key' => 'steemId', 'meta_value' => $account));
+      $users = $user_query->get_results();
+      if (!empty($users) && is_array($users) && count($users) > 0) {
+        $user = $users[0];
+        if (!empty($user)) {
+          $user_id = $user->ID;
+        }
+      }
+    }
+    if (empty($wif) && !empty($user_id)) {
+      $wif = get_user_meta($user_id, 'user_steem_posting_key', true);
+    }
     if (empty($wif) && function_exists('get_option')) {
       $wif = get_option("steem_dapp_wif");
     }
