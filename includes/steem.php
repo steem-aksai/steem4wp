@@ -105,14 +105,10 @@ class Steem
       $user_id = get_current_user_id();
     }
     if (empty($user_id) && !empty($account)) {
-      $user_query = new WP_User_Query(array('meta_key' => 'steemId', 'meta_value' => $account));
-      $users = $user_query->get_results();
-      if (!empty($users) && is_array($users) && count($users) > 0) {
-        $user = $users[0];
-        if (!empty($user)) {
-          $user_id = $user->ID;
-        }
-      }
+      $user_id = $this->queryUserIdByField('steemId', $account);
+    }
+    if (empty($user_id) && !empty($account)) {
+      $user_id = $this->queryUserIdByField('user_steem_id', $account);
     }
     if (empty($wif) && !empty($user_id)) {
       $wif = get_user_meta($user_id, 'user_steem_posting_key', true);
@@ -124,6 +120,19 @@ class Steem
       $wif = getenv('STEEM_DAPP_WIF');
     }
     return $wif;
+  }
+
+  protected function queryUserIdByField($key, $value)
+  {
+    $user_query = new WP_User_Query(array('meta_key' => $key, 'meta_value' => $value));
+    $users = $user_query->get_results();
+    if (!empty($users) && is_array($users) && count($users) > 0) {
+      $user = $users[0];
+      if (!empty($user)) {
+        return $user->ID;
+      }
+    }
+    return null;
   }
 
   protected function canBroadcastLocally()
