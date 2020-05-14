@@ -40,7 +40,7 @@ class Steem
    */
   protected $node;
 
-    /**
+  /**
    * @var $steemAccount
    *
    * The SteemAccount instance
@@ -48,17 +48,25 @@ class Steem
   protected $steemAccount;
 
 
-    /**
+  /**
    * @var $node
    *
    * The SteemPost instance
    */
   protected $steemPost;
 
+
+  /**
+   * @var $hasCryptoLib
+   *
+   * The crypto PHP lib has installed locally or not
+   */
+  protected $hasCrytoLib;
+
   /**
    * Initialize the connection to the host
    *
-   * @param      string  $host   The node you want to connect
+   * @param      string  $node   The node you want to connect
    */
   public function __construct($node = null)
   {
@@ -68,13 +76,20 @@ class Steem
       }
     }
     if (empty($node)) {
-      $node = "https://anyx.io";
+      $node = "https://api.steemit.com";
     }
 
     $this->node = trim($node);
     $this->steemAccount = new SteemAccount($this->node);
     $this->steemPost = new SteemPost($this->node);
     $this->steemChain = new SteemChain($this->node);
+    $this->steem4everyone = new Steem4Everyone($this->node);
+
+    if (function_exists('gmp_init')) {
+      $this->hasCrytoLib = true;
+    } else {
+      $this->hasCrytoLib = false;
+    }
   }
 
   /**
@@ -84,7 +99,20 @@ class Steem
    */
   protected function getWif($account)
   {
-    $wif = get_user_meta( get_current_user_id(), 'user_steem_posting_key', true );
+    $wif = null;
+    $user_id = null;
+    if (function_exists('get_current_user_id')) {
+      $user_id = get_current_user_id();
+    }
+    if (empty($user_id) && !empty($account)) {
+      $user_id = $this->queryUserIdByField('steemId', $account);
+    }
+    if (empty($user_id) && !empty($account)) {
+      $user_id = $this->queryUserIdByField('user_steem_id', $account);
+    }
+    if (empty($wif) && !empty($user_id)) {
+      $wif = get_user_meta($user_id, 'user_steem_posting_key', true);
+    }
     if (empty($wif) && function_exists('get_option')) {
       $wif = get_option("steem_dapp_wif");
     }
@@ -94,6 +122,23 @@ class Steem
     return $wif;
   }
 
+  protected function queryUserIdByField($key, $value)
+  {
+    $user_query = new WP_User_Query(array('meta_key' => $key, 'meta_value' => $value));
+    $users = $user_query->get_results();
+    if (!empty($users) && is_array($users) && count($users) > 0) {
+      $user = $users[0];
+      if (!empty($user)) {
+        return $user->ID;
+      }
+    }
+    return null;
+  }
+
+  protected function canBroadcastLocally()
+  {
+    return $this->hasCrytoLib;
+  }
 
   /**
    * Get the account profile information
@@ -378,7 +423,11 @@ class Steem
     $parentPermlink = sanitizePermlink($category);
     $parentAuthor = "";
 
-    return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+    if ($this->canBroadcastLocally()) {
+      return $this->steemPost->comment($this->getWif($author), $parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+    } else {
+      return $this->steem4everyone->comment($parentAuthor, $parentPermlink, $author, $permlink, $title, $body, $jsonMetadata);
+    }
   }
 
   /**

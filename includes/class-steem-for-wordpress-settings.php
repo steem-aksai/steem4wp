@@ -199,21 +199,21 @@ class Steem_for_Wordpress_Settings
   private function settings_fields()
   {
 
-    $settings['steem'] = array(
-      'title'       => __('Steem DApp 应用设置', 'steem-for-wordpress'),
-      'description' => __('Steem DApp 应用的基本设置，包括 App 主账户、密码等设置', 'steem-for-wordpress'),
+    $settings['dapp'] = array(
+      'title'       => __('DApp 设置', 'steem-for-wordpress'),
+      'description' => __('DApp 应用的基本设置，包括 App 主账户、密码等设置', 'steem-for-wordpress'),
       'fields'      => array(
         array(
           'id'          => 'dapp_account',
-          'label'       => __('Steem DApp 账户', 'steem-for-wordpress'),
-          'description' => __('注册的Steem DApp的主账户，例如 wherein-io', 'steem-for-wordpress'),
+          'label'       => __('DApp 账户', 'steem-for-wordpress'),
+          'description' => __('注册的DApp的主账户，例如 wherein-io', 'steem-for-wordpress'),
           'type'        => 'text',
           'default'     => '',
           'placeholder' => __('dapp-com', 'steem-for-wordpress'),
         ),
         array(
           'id'          => 'dapp_wif',
-          'label'       => __('Steem DApp 账户的发帖密码', 'steem-for-wordpress'),
+          'label'       => __('DApp 账户的发帖密码', 'steem-for-wordpress'),
           'description' => __('此处为发帖密码（posting key），请勿填写 active key, owner key, master key等秘钥', 'steem-for-wordpress'),
           'type'        => 'password',
           'default'     => '',
@@ -221,7 +221,7 @@ class Steem_for_Wordpress_Settings
         ),
         array(
           'id'          => 'dapp_steemid_password',
-          'label'       => __('Steem DApp 的 SteemID 密码', 'steem-for-wordpress'),
+          'label'       => __('DApp 的 SteemID 密码', 'steem-for-wordpress'),
           'description' => __('DApp 需要此密码通过 SteemID 认证用户信息、注册新用户等', 'steem-for-wordpress'),
           'type'        => 'password',
           'default'     => '',
@@ -229,7 +229,7 @@ class Steem_for_Wordpress_Settings
         ),
         array(
           'id'          => 'dapp_steemid_secret',
-          'label'       => __('Steem DApp 的 SteemID 验证秘钥', 'steem-for-wordpress'),
+          'label'       => __('DApp 的 SteemID 验证秘钥', 'steem-for-wordpress'),
           'description' => __('DApp 需要此秘钥通过 SteemID 认证用户信息、注册新用户等', 'steem-for-wordpress'),
           'type'        => 'password',
           'default'     => '',
@@ -237,19 +237,33 @@ class Steem_for_Wordpress_Settings
         ),
         array(
           'id'          => 'dapp_default_tags',
-          'label'       => __('Steem DApp 发帖默认标签', 'steem-for-wordpress'),
-          'description' => __('用Steem DApp发帖时的默认标签，标签由英文、数字和短横（-）组成，标签之间用空格分开', 'steem-for-wordpress'),
+          'label'       => __('DApp 发帖默认标签', 'steem-for-wordpress'),
+          'description' => __('用DApp发帖时的默认标签，标签由英文、数字和短横（-）组成，标签之间用空格分开', 'steem-for-wordpress'),
           'type'        => 'text',
           'default'     => '',
           'placeholder' => __('cn wherein', 'steem-for-wordpress'),
         ),
         array(
+          'id'          => 'dapp_tags_mapping',
+          'label'       => __('DApp 标签的中英文对应关系', 'steem-for-wordpress'),
+          'description' => __('每行包含标签的英文和中文形式。英文标签将同步到Steem，中文标签在小程序上显示，用逗号、空格或制表符（tab）分开', 'steem-for-wordpress'),
+          'type'        => 'textarea',
+          'default'     => '',
+          'placeholder' => __("life  生活\nphotography  摄影\nart  艺术\nintroduceyourself  自我介绍\ncryptocurrency  加密货币", 'steem-for-wordpress'),
+        ),
+      ),
+    );
+    $settings['api'] = array(
+      'title'       => __('API 设置', 'steem-for-wordpress'),
+      'description' => __('添加您想使用的 Steem API 和对应的权限设置', 'steem-for-wordpress'),
+      'fields'      => array(
+        array(
           'id'          => 'api_node_url',
           'label'       => __('Steem API 节点地址', 'steem-for-wordpress'),
           'description' => __('Steem API 节点的URL，例如 https://steem.61bts.com, https://steemd.minnowsupportproject.org', 'steem-for-wordpress'),
           'type'        => 'text',
-          'default'     => 'https://steemd.minnowsupportproject.org',
-          'placeholder' => __('posting key', 'steem-for-wordpress'),
+          'default'     => 'https://api.steemit.com',
+          'placeholder' => __('api node url', 'steem-for-wordpress'),
         ),
         array(
           'id'          => '2nd_api_node_url',
@@ -257,16 +271,18 @@ class Steem_for_Wordpress_Settings
           'description' => __('Steem 分链的 API 节点的URL，例如 https://anyx.io', 'steem-for-wordpress'),
           'type'        => 'text',
           'default'     => '',
-          'placeholder' => __('posting key', 'steem-for-wordpress'),
+          'placeholder' => __('2nd api node url', 'steem-for-wordpress'),
         ),
         array(
-          'id'          => 'dapp_tags_mapping',
-          'label'       => __('Steem DApp 标签的中英文对应关系', 'steem-for-wordpress'),
-          'description' => __('每行包含标签的英文和中文形式。英文标签将同步到Steem，中文标签在小程序上显示，用逗号、空格或制表符（tab）分开', 'steem-for-wordpress'),
-          'type'        => 'textarea',
+          'id'          => 'steem4everyone_password',
+          'label'       => __('Steem4Everyone API 密码', 'steem-for-wordpress'),
+          'description' => __('本地无法安装 php-gmp 扩展时，您可以使用 Steem4Everyone API进行发帖等操作', 'steem-for-wordpress'),
+          'type'        => 'password',
           'default'     => '',
-          'placeholder' => __("life  生活\nphotography  摄影\nart  艺术\nintroduceyourself  自我介绍\ncryptocurrency  加密货币", 'steem-for-wordpress'),
+          'placeholder' => __('password', 'steem-for-wordpress'),
         ),
+      ),
+    );
         // array(
         //   'id'          => 'secret_text_field',
         //   'label'       => __( 'Some Secret Text', 'steem-for-wordpress' ),
@@ -327,8 +343,6 @@ class Steem_for_Wordpress_Settings
         //   ),
         //   'default'     => array( 'circle', 'triangle' ),
         // ),
-      ),
-    );
 
     // $settings['extra'] = array(
     //   'title'       => __( 'Extra', 'steem-for-wordpress' ),

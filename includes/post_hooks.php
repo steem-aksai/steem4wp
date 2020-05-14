@@ -1,14 +1,9 @@
 <?php
 /*
- * WordPress Custom API Data Hooks
+ * WordPress Post Publish Hooks
  */
 
 if (!defined('ABSPATH')) exit;
-
-add_filter('user_contactmethods', function ($userInfo) {
-  $userInfo['steemId']         = __('Steem ID');
-  return $userInfo;
-});
 
 // add Steem options for publishing post in user profile page
 add_action('personal_options_update', 'update_steem_user_settings');
@@ -111,6 +106,48 @@ function display_steem_custom_box($post)
   }
 }
 
+
+// ---- Below are post actions ----
+
+// the actual function that perform the sync
+function sync_post_to_steem($post)
+{
+  if (empty($post)) {
+    return ;
+  }
+
+  $user_id = $post->post_author;
+  $posting_key = get_user_meta($user_id, 'user_steem_posting_key', true);
+  $username = get_user_meta($user_id, 'user_steem_id', true);
+
+  if (!empty($posting_key) && !empty($username)) {
+    $tags = wp_get_post_tags($post->ID);
+    if (empty($tags)) {
+      $tags = get_user_meta($user_id, 'user_steem_default_tags', true);
+      if (!empty($tags) && is_string($tags)) {
+        $tags = strtolower($tags);
+        $tags = wp_parse_list($tags);
+      }
+    } else {
+      $tags_arr = [];
+      foreach ($tags as $t) {
+        $tags_arr[] = str_replace(" ", "", $t->name);
+      }
+      $tags = $tags_arr;
+    }
+    $footer = get_user_meta($user_id, 'user_steem_footer', true);
+    if (!empty($footer)) {
+      $footer = str_replace("[%original_link%]", get_permalink($post->ID), $footer);
+    }
+    write_log("steem4wp: publish post by @{$username}");
+    write_log($tags);
+    write_log("------");
+    $steem_ops = new WP_Steem_Ops();
+    $steem_ops->create_post($username, $post->ID, $tags, $footer);
+  }
+  return;
+}
+
 // add hook for publishing to Steem
 add_action('transition_post_status', 'steem_publish_post', 15, 3);
 function steem_publish_post($new_status, $old_status, $post)
@@ -125,33 +162,7 @@ function steem_publish_post($new_status, $old_status, $post)
     if (!isset($_POST['user_steem_publish_post']) && isset($_POST['user_steem_not_publish_post'])) {
       return;
     } else {
-      $posting_key = get_user_meta(get_current_user_id(), 'user_steem_posting_key', true);
-      $username = get_user_meta(get_current_user_id(), 'user_steem_id', true);
-      if (!empty($posting_key) && !empty($username)) {
-        $tags = wp_get_post_tags($post->ID);
-        if (empty($tags)) {
-          $tags = get_user_meta(get_current_user_id(), 'user_steem_default_tags', true);
-          if (!empty($tags) && is_string($tags)) {
-            $tags = strtolower($tags);
-            $tags = wp_parse_list($tags);
-          }
-        } else {
-          $tags_arr = [];
-          foreach ($tags as $t) {
-            $tags_arr[] = str_replace(" ", "", $t->name);
-          }
-          $tags = $tags_arr;
-        }
-        $footer = get_user_meta(get_current_user_id(), 'user_steem_footer', true);
-        if (!empty($footer)) {
-          $footer = str_replace("[%original_link%]", get_permalink($post->ID), $footer);
-        }
-        write_log("steem4wp: public post by @{$username}");
-        write_log($tags);
-        write_log("------");
-        $steem_ops = new WP_Steem_Ops();
-        $steem_ops->create_post($username, $post->ID, $tags, $footer);
-      }
+      sync_post_to_steem($post);
       return;
     }
   }
@@ -166,4 +177,55 @@ function steem_publish_post($new_status, $old_status, $post)
   // }
 
   return;
+}
+
+// add hook for scheduling future post
+add_action('publish_future_post', 'steem_publish_future_post');
+// add_action('future_to_publish', 'steem_publish_future_post');
+function steem_publish_future_post($post_id)
+{
+  // if the publish to steem checkbox is checked
+  $value = get_post_meta($post_id, 'user_steem_publish_post', true);
+  write_log("publish_future_post: id = ${post_id}; sync_to_steem = ${value}");
+
+  if ($value != "0") {
+    $post = get_post($post_id);
+    sync_post_to_steem($post);
+  }
+}
+
+// click save post button
+add_action('save_post', 'steem_save_post', 8);
+function steem_save_post($post_id)
+{
+  if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE || !current_user_can('edit_post', $post_id) || $_POST == [])
+    return;
+
+  if (isset($_POST['user_steem_publish_post']) || isset($_POST['user_steem_not_publish_post'])) {
+    if ($_POST['user_steem_publish_post'] === '1') {
+      // If post is empty/ doesn't have the hidden_mm attribute this means that we are using gutenberg
+      // if ($_POST == [] || !isset($_POST['hidden_mm'])) {
+      //   if (get_post_meta($post_id, 'steem_author', true) == "" && get_post_status($post_id) == 'publish') {
+      //     $post = get_post($post_id);
+      //     sync_post_to_steem($post);
+      //   }
+      // }
+      update_post_meta($post_id, 'user_steem_publish_post', '1');
+    } else {
+      update_post_meta($post_id, 'user_steem_publish_post', '0');
+    }
+  }
+
+  // if (isset($_POST['user_steem_update_post'])) {
+  //   if ($_POST['user_steem_update_post'] === '1') {
+  //     // If post is empty/ doesn't have the hidden_mm attribute this means that we are using gutenberg
+  //     if ($_POST == [] || !isset($_POST['hidden_mm'])) {
+  //       $post = get_post($post_id);
+  //       sync_post_to_steem($post_id);
+  //     }
+  //     update_post_meta($post_id, 'user_steem_update_post', $_POST['user_steem_update_post']);
+  //   } else {
+  //     update_post_meta($post_id, 'user_steem_update_post', '0');
+  //   }
+  // }
 }
