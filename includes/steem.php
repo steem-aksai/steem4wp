@@ -166,6 +166,16 @@ class Steem
   }
 
   /**
+   * Get the history of the account
+   *
+   * @param      string  $author   The account name
+   */
+  public function getAccountHistory($author, $start, $limit)
+  {
+    return $this->steemAccount->getAccountHistory($author, $limit, $start);
+  }
+
+  /**
    * Count the number of follows and followers of $account
    *
    * @param      string  $author  The account name
