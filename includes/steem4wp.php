@@ -42,10 +42,13 @@ class WP_Steem_Ops
       $post = get_post($post_id);
       $author_old = get_post_meta($post_id, 'steem_author', true);
       $permlink = get_post_meta($post_id, 'steem_permlink', true);
+      $video_url = get_post_meta($post_id, 'video', true); // mini-program video meta
+      $content = $post->post_content;
+      if (!empty($video_url)) {
+        $content = $content . "\n" . $video_url;
+      }
       if (!empty($footer)) {
-        $content = $post->post_content . "\n" . $footer;
-      } else {
-        $content = $post->post_content;
+        $content = $content . "\n" . $footer;
       }
       if (empty($author_old) && empty($permlink)) {
         $tx = $this->steem->createPost($author, $post->post_title, $content, $tags);
