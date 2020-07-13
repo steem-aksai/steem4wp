@@ -45,7 +45,7 @@ class WP_Steem_Ops
       $video_url = get_post_meta($post_id, 'video', true); // mini-program video meta
       $content = $post->post_content;
       if (!empty($video_url)) {
-        $content = $content . "\n" . $video_url;
+        $content = $content . "\n\n" . $video_url;
       }
       if (!empty($footer)) {
         $content = $content . "\n" . $footer;
