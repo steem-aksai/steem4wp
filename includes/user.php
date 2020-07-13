@@ -103,6 +103,15 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
         'args'                  => $this->wp_user_get_steem_account_info_collection_params(),
       )
     ));
+
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/history', array(
+      array(
+        'methods'               => WP_REST_Server::READABLE,
+        'callback'              => array($this, 'wp_user_get_steem_account_history'),
+        'permission_callback'   => array($this, 'wp_user_steem_query_permissions_check'),
+        'args'                  => $this->wp_user_get_steem_account_history_collection_params(),
+      )
+    ));
   }
 
 
@@ -271,6 +280,37 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
       'default'  => '',
       'description'  => "Steem用户名",
       'type'  =>   "string"
+    );
+    return $params;
+  }
+
+  /**
+   * Retrieves the query params for querying steem account history
+   *
+   * @since 4.7.0
+   *
+   * @return array Collection parameters.
+   */
+  public function wp_user_get_steem_account_history_collection_params()
+  {
+    $params = array();
+    $params['username'] = array(
+      'required' => true,
+      'default'  => '',
+      'description'  => "Steem用户名",
+      'type'  =>   "string"
+    );
+    $params['index'] = array(
+      'required' => true,
+      'default'  => '',
+      'description'  => "查询的起始索引",
+      'type'  =>   "int"
+    );
+    $params['limit'] = array(
+      'required' => true,
+      'default'  => '',
+      'description'  => "返回历史数据限额",
+      'type'  =>   "int"
     );
     return $params;
   }
@@ -446,6 +486,31 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
     return $response;
   }
 
+  /**
+   *
+   * @since 4.7.0
+   * @access public
+   *
+   * @param WP_REST_Request $request Full details about the request.
+   * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+   */
+  public function wp_user_get_steem_account_history($request)
+  {
+    $params = $request->get_params();
+    $steemId = $params['username'];
+    $index = $params['index'];
+    $limit = $params['limit'];
+    if (!$this->steem && class_exists('Steem')) {
+      $this->steem = new Steem();
+    }
+    $history = $this->steem->getAccountHistory($steemId, $index, $limit);
+    if (!empty($history) && count($history) > 0) {
+      $response = rest_ensure_response($history);
+      return $response;
+    } else {
+      return new WP_Error('error', '获取Steem用户数据出错', array('status' => 500, 'errcode' => $history));
+    }
+  }
 
   /**
    *
