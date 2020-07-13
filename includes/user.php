@@ -300,7 +300,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
       'description'  => "Steem用户名",
       'type'  =>   "string"
     );
-    $params['index'] = array(
+    $params['start'] = array(
       'required' => true,
       'default'  => '',
       'description'  => "查询的起始索引",
@@ -498,12 +498,12 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
   {
     $params = $request->get_params();
     $steemId = $params['username'];
-    $index = $params['index'];
+    $start = $params['start'];
     $limit = $params['limit'];
     if (!$this->steem && class_exists('Steem')) {
       $this->steem = new Steem();
     }
-    $history = $this->steem->getAccountHistory($steemId, $index, $limit);
+    $history = $this->steem->getAccountHistory($steemId, $start, $limit);
     if (!empty($history) && count($history) > 0) {
       $response = rest_ensure_response($history);
       return $response;

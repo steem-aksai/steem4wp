@@ -170,9 +170,9 @@ class Steem
    *
    * @param      string  $author   The account name
    */
-  public function getAccountHistory($author, $index, $limit)
+  public function getAccountHistory($author, $start, $limit)
   {
-    return $this->steemAccount->getAccountHistory($author, $limit, $index);
+    return $this->steemAccount->getAccountHistory($author, $limit, $start);
   }
 
   /**
