@@ -560,6 +560,18 @@ class Steem
     return $this->steemChain->getCurrentMeidanHistoryPrice();
   }
 
+  /**
+   * Get state for $path eg: /@koei/transfers
+   *
+   * @param      string  $path   The path
+   *
+   * @return     array   The state.
+   */
+  public function getState($path)
+  {
+    return $this->steemPost->getState($path);
+  }
+
 }
 
 function sanitizePermlink($permlink) {
