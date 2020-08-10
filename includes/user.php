@@ -112,6 +112,14 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
         'args'                  => $this->wp_user_get_steem_account_history_collection_params(),
       )
     ));
+
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/steem', array(
+      array(
+        'methods'               => WP_REST_Server::READABLE,
+        'callback'              => array($this, 'wp_user_get_steem_id_by_wp_id'),
+        'args'                  => $this->wp_user_get_steem_id_collection_params(),
+      )
+    ));
   }
 
 
@@ -314,6 +322,19 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
     );
     return $params;
   }
+
+public function wp_user_get_steem_id_collection_params()
+{
+  $params = array(
+    'wpid' => array(
+      'required'  => true,
+      'default'   => '',
+      'description'=> 'wordpress_user_id',
+      'type'      => 'string'
+    )
+  );
+  return $params;
+}
 
   /**
    * Retrieves the query params for the posts collection.
@@ -757,5 +778,20 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
       write_log("register Steem account @{$steemId} failed.");
       return new WP_Error('error', "注册Steem账户 @{$steemId} 失败", array('status' => 500));
     }
+  }
+
+  public function wp_user_get_steem_id_by_wp_id($request){
+    $wpid = isset($request['wpid']) ? (int)$request['wpid'] : 0;
+    if ($wpid == '' || !is_numeric($wpid) || $wpid == 0){
+			return new WP_Error( 'error', '无效用户 ID' , array( 'status' => 403 ) );
+    }
+    $wp_user = get_user_by('ID',$wpid);
+    if (  !$wp_user ){
+      return new WP_Error( 'error', '未发现WordPress用户', array( 'status' => 403) );
+    }
+    $data = array(
+      'steemid'   => $wp_user->steemId
+    );
+    return rest_ensure_response($data);
   }
 }
