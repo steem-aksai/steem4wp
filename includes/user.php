@@ -113,7 +113,7 @@ class WP_Steem_REST_User_Router extends WP_REST_Controller
       )
     ));
 
-    register_rest_route($this->namespace, '/' . $this->rest_base . '/steem', array(
+    register_rest_route($this->namespace, '/' . $this->rest_base . '/steem/id', array(
       array(
         'methods'               => WP_REST_Server::READABLE,
         'callback'              => array($this, 'wp_user_get_steem_id_by_wp_id'),
